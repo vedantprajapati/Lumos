@@ -743,6 +743,9 @@
         {% for task in tasks_done %}
         <li class="done">{{ task }}</li>
         {% endfor %}
+        {% if not tasks_todo and not tasks_done %}
+        <li class="todo" style="color: #666; font-style: italic;">No pending tasks for today.</li>
+        {% endif %}
       </ul>
 
       <div class="section-banner">
@@ -754,6 +757,8 @@
         <span class="pill-tag">{{ note.title }}</span>
         <p class="card-body">{{ note.snippet }}</p>
       </div>
+      {% else %}
+      <div style="font-size: 5.4pt; color: #666; font-style: italic; margin-bottom: 3px;">No pinned memoranda.</div>
       {% endfor %}
 
       <div class="section-banner">

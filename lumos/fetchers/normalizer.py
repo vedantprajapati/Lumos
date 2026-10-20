@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
 Pluggable adapter & schema normalizer for Muse RPC tool-call outputs.
+Integrates Ontario statutory holidays and Monday - Friday 9-6 Work schedule.
+Zero fake mock data.
 """
-from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from datetime import date, datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 TIMELINE_HOURS = list(range(7, 22))  # 7 AM to 9 PM (21:00)
 
@@ -32,10 +34,35 @@ def _parse_hour(time_str: str) -> Tuple[int, bool]:
     return 9, False
 
 
-def normalize_gcal_today(raw_events: List[Any]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    slots = {h: [] for h in TIMELINE_HOURS}
-    all_day = []
+def normalize_gcal_today(
+    raw_events: List[Any],
+    target_date: Optional[date] = None,
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """
+    Normalizes today's events into hourly slots (7 AM - 9 PM) and all-day banners.
+    Always enforces Monday - Friday 9:00 AM - 6:00 PM Work schedule unless an Ontario stat holiday.
+    """
+    from lumos.fetchers.google import get_default_work_event, is_ontario_stat_holiday
 
+    d = target_date or datetime.now().date()
+    is_holiday, holiday_name = is_ontario_stat_holiday(d)
+    work_ev = get_default_work_event(d)
+
+    slots: Dict[int, List[Dict[str, Any]]] = {h: [] for h in TIMELINE_HOURS}
+    all_day: List[Dict[str, Any]] = []
+
+    # 1. Statutory Holiday check
+    if is_holiday:
+        all_day.append({
+            "time": "All Day",
+            "title": f"Statutory Holiday — {holiday_name}",
+            "location": "Ontario",
+            "hour": 8,
+            "all_day": True,
+        })
+
+    # 2. Process any external/calendar events
+    has_work = False
     for item in raw_events or []:
         if isinstance(item, str):
             parts = item.split(":", 1) if ":" in item else ["09:00 AM", item]
@@ -67,6 +94,9 @@ def normalize_gcal_today(raw_events: List[Any]) -> Tuple[List[Dict[str, Any]], L
         else:
             continue
 
+        if "work" in str(title).lower():
+            has_work = True
+
         ev_obj = {
             "time": str(t_str),
             "title": str(title)[:38],
@@ -80,6 +110,10 @@ def normalize_gcal_today(raw_events: List[Any]) -> Tuple[List[Dict[str, Any]], L
             clamped = max(7, min(21, int(hour)))
             slots[clamped].append(ev_obj)
 
+    # 3. Monday - Friday 9:00 AM - 6:00 PM Work block injection (unless stat holiday)
+    if work_ev and not has_work:
+        slots[9].insert(0, work_ev)
+
     timeline = []
     for h in TIMELINE_HOURS:
         suffix = "AM" if h < 12 else "PM"
@@ -88,11 +122,22 @@ def normalize_gcal_today(raw_events: List[Any]) -> Tuple[List[Dict[str, Any]], L
             "hour": h,
             "label": f"{h12} {suffix}",
             "events": slots[h],
+            "is_work_hour": (9 <= h <= 17) and bool(work_ev),
         })
     return all_day, timeline
 
 
-def normalize_gcal_upcoming(raw_upcoming: List[Any]) -> List[Dict[str, str]]:
+def normalize_gcal_upcoming(
+    raw_upcoming: List[Any],
+    target_date: Optional[date] = None,
+) -> List[Dict[str, str]]:
+    """
+    Normalizes upcoming 7-day events. If no external events are queued,
+    builds the real week horizon (Work 9-6 on weekdays, Rest on weekends/holidays).
+    """
+    from lumos.fetchers.google import is_ontario_stat_holiday
+
+    d = target_date or datetime.now().date()
     out = []
     for item in raw_upcoming or []:
         if isinstance(item, str):
@@ -105,6 +150,19 @@ def normalize_gcal_upcoming(raw_upcoming: List[Any]) -> List[Dict[str, str]]:
             time = item.get("time") or item.get("start") or ""
             title = item.get("title") or item.get("summary") or "Upcoming Event"
             out.append({"day": str(day)[:12], "time": str(time)[:10], "title": str(title)[:40]})
+
+    if not out:
+        for offset in range(1, 8):
+            next_d = d + timedelta(days=offset)
+            is_hol, hol_name = is_ontario_stat_holiday(next_d)
+            day_str = next_d.strftime("%a %m/%d")
+            if is_hol:
+                out.append({"day": day_str, "time": "All Day", "title": f"Stat Holiday: {hol_name}"})
+            elif next_d.weekday() < 5:
+                out.append({"day": day_str, "time": "09:00 AM - 06:00 PM", "title": "Work"})
+            else:
+                out.append({"day": day_str, "time": "All Day", "title": "Rest & Personal"})
+
     return out[:6]
 
 
@@ -138,62 +196,51 @@ def normalize_emails(raw_emails: List[Any]) -> List[Dict[str, str]]:
     return out[:4]
 
 
-def _clean_task_title(val: Any) -> str:
-    s = str(val or "").strip()
-    if len(s) > 42:
-        cutoff = s[:42].rfind(" ")
-        if cutoff > 25:
-            return s[:cutoff] + "..."
-        return s[:40] + "..."
-    return s
+def normalize_tasks(payload: Dict[str, Any]) -> Tuple[List[str], List[str]]:
+    tasks_raw = (
+        payload.get("tasks_todo")
+        or payload.get("tasks")
+        or payload.get("google_tasks")
+        or []
+    )
+    done_raw = payload.get("tasks_done") or []
 
-
-def normalize_tasks(raw_payload: Dict[str, Any]) -> Tuple[List[str], List[str]]:
     todo: List[str] = []
     done: List[str] = []
 
-    for t in raw_payload.get("tasks_todo") or []:
-        if isinstance(t, dict):
-            todo.append(_clean_task_title(t.get("title") or t.get("text")))
-        else:
-            todo.append(_clean_task_title(t))
+    if isinstance(tasks_raw, list):
+        for t in tasks_raw:
+            if isinstance(t, str):
+                todo.append(t[:65])
+            elif isinstance(t, dict):
+                title = t.get("title") or t.get("task") or t.get("name") or ""
+                if not title:
+                    continue
+                if t.get("status") == "completed" or t.get("done"):
+                    done.append(str(title)[:65])
+                else:
+                    todo.append(str(title)[:65])
 
-    for t in raw_payload.get("tasks_done") or []:
-        if isinstance(t, dict):
-            done.append(_clean_task_title(t.get("title") or t.get("text")))
-        else:
-            done.append(_clean_task_title(t))
+    if isinstance(done_raw, list):
+        for t in done_raw:
+            if isinstance(t, str):
+                done.append(t[:65])
+            elif isinstance(t, dict):
+                title = t.get("title") or t.get("task") or t.get("name") or ""
+                if title:
+                    done.append(str(title)[:65])
 
-    combined = raw_payload.get("tasks") or raw_payload.get("google_tasks") or []
-    for item in combined:
-        if isinstance(item, dict):
-            title = _clean_task_title(item.get("title") or item.get("name"))
-            status = str(item.get("status") or "").lower()
-            is_done = bool(item.get("done") or item.get("completed") or status in ("completed", "done"))
-            if is_done:
-                done.append(title)
-            else:
-                todo.append(title)
-        elif isinstance(item, str) and not todo:
-            todo.append(_clean_task_title(item))
-
-    return [x for x in todo if x][:5], [x for x in done if x][:3]
+    return todo[:5], done[:3]
 
 
-def normalize_keep_notes(raw_keep: List[Any]) -> List[Dict[str, str]]:
+def normalize_keep_notes(raw_notes: List[Any]) -> List[Dict[str, str]]:
     out = []
-    for item in raw_keep or []:
+    for item in raw_notes or []:
         if isinstance(item, str):
-            if ":" in item:
-                title, body = item.split(":", 1)
-                out.append({"title": title.strip()[:24], "snippet": body.strip()[:80]})
-            else:
-                out.append({"title": "KEEP NOTE", "snippet": item.strip()[:80]})
+            out.append({"title": "Note", "text": item[:120]})
         elif isinstance(item, dict):
-            title = item.get("title") or item.get("label") or "KEEP NOTE"
-            snippet = item.get("snippet") or item.get("text") or item.get("body") or item.get("content") or ""
             out.append({
-                "title": str(title).strip()[:24],
-                "snippet": str(snippet).replace("\n", " • ").strip()[:80],
+                "title": (item.get("title") or "Note")[:24],
+                "text": (item.get("text") or item.get("body") or "")[:120],
             })
     return out[:3]

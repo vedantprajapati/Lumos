@@ -146,14 +146,15 @@ def build_briefing_context(
     weather = payload.get("weather") or fetch_weather()
 
     # 2. Google Calendar: Today (Hourly Timeline 7 AM - 9 PM) + Next 7 Days
+    target_d = today_dt.date()
     raw_today = payload.get("gcal_today") or payload.get("events")
     raw_upcoming = payload.get("gcal_upcoming") or payload.get("gcal_next_7_days")
 
     if raw_today is not None or raw_upcoming is not None:
-        all_day, timeline = normalize_gcal_today(raw_today or [])
-        gcal_upcoming = normalize_gcal_upcoming(raw_upcoming or [])
+        all_day, timeline = normalize_gcal_today(raw_today or [], target_date=target_d)
+        gcal_upcoming = normalize_gcal_upcoming(raw_upcoming or [], target_date=target_d)
     else:
-        gcal_data = fetch_gcal_events(user=u_cfg.slug)
+        gcal_data = fetch_gcal_events(user=u_cfg.slug, target_date=target_d)
         all_day = gcal_data["all_day"]
         timeline = gcal_data["timeline"]
         gcal_upcoming = gcal_data["upcoming_7d"][:6]
@@ -166,24 +167,24 @@ def build_briefing_context(
         tasks_todo = tasks_data["todo"][:5]
         tasks_done = tasks_data["done"][:3]
 
-    # 4. Gmail & Outlook Updates
+    # 4. Gmail & Outlook Updates (0 fake mock data)
     raw_gmail = payload.get("gmail_updates") or payload.get("gmail")
     gmail_updates = (
         normalize_emails(raw_gmail)
         if raw_gmail is not None
-        else fetch_gmail_updates(user=u_cfg.slug)[:4]
+        else []
     )
 
     raw_outlook = payload.get("outlook_updates") or payload.get("outlook")
     outlook_updates = (
         normalize_emails(raw_outlook)
         if raw_outlook is not None
-        else [{"sender": "Outlook", "subject": "No unread priority Outlook threads"}]
+        else []
     )
 
-    # 5. Google Keep Notes
+    # 5. Google Keep Notes (0 fake mock data)
     raw_keep = payload.get("keep_notes") or payload.get("keep") or payload.get("google_keep")
-    keep_notes = normalize_keep_notes(raw_keep) if raw_keep is not None else fetch_keep_notes()[:3]
+    keep_notes = normalize_keep_notes(raw_keep) if raw_keep is not None else []
 
     # 6. Garmin Monthly Gym & Biometrics
     garmin = payload.get("garmin") or fetch_garmin_stats(user=u_cfg.slug)
