@@ -14,16 +14,13 @@
 
 ---
 
-## 📸 Broadsheet in the Wild
+## 📸 Daily Broadsheet Preview
 
 <p align="center">
-  <img src="docs/assets/lumos_physical_print.png" width="45%" alt="Physical Thermal Broadsheet Print on Phomemo M834" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/assets/lumos_broadsheet_preview.png" width="48%" alt="Digital 1-Page Broadsheet Preview" />
+  <img src="docs/assets/lumos_broadsheet_preview.png" width="70%" alt="The Lumos Chronicle 1-Page Broadsheet" />
 </p>
 
-> **Left:** Freshly printed on continuous 8.5" thermal roll paper via the Phomemo M834 on a Raspberry Pi 3B.  
-> **Right:** The compiled high-density vector broadsheet (`2026-10-20_Lumos_Digest.pdf`).
+> High-density 300 DPI vector broadsheet (`2026-10-20_Lumos_Digest.pdf`) compiled on a Raspberry Pi 3B for continuous thermal roll printing on the Phomemo M834.
 
 ---
 
