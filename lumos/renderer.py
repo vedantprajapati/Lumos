@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
-Core digest context builder, HTML/PDF renderer, and CUPS print dispatcher.
+Core digest context builder, PDF renderer, and CUPS print dispatcher.
 """
 from datetime import datetime
 import json
+from pathlib import Path
+import shutil
 import subprocess
+import tempfile
 from typing import Any, Dict, Optional
 from jinja2 import Template
 
@@ -170,12 +173,44 @@ def render_html(
     muse_payload: Optional[Dict[str, Any]] = None,
     user: Optional[str] = None,
 ) -> str:
+    """Renders the Jinja2 template in-memory as an intermediate step for PDF generation."""
     ctx = build_briefing_context(custom_note=custom_note, muse_payload=muse_payload, user=user)
-    rendered = Template(TEMPLATE_PATH.read_text(encoding="utf-8")).render(**ctx)
+    return Template(TEMPLATE_PATH.read_text(encoding="utf-8")).render(**ctx)
 
-    _, html_path, _ = get_daily_artifact_paths(ctx["user_slug"])
-    html_path.write_text(rendered, encoding="utf-8")
-    return rendered
+
+def _write_pdf_fallback_browser(rendered_html: str, target_pdf: str) -> bool:
+    """Fallback PDF renderer using headless Edge/Chromium when WeasyPrint GTK libs are absent on Windows."""
+    candidates = [
+        shutil.which("msedge"),
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        shutil.which("chrome"),
+        shutil.which("chromium"),
+    ]
+    browser = next((c for c in candidates if c and Path(c).exists()), None)
+    if not browser:
+        return False
+
+    with tempfile.NamedTemporaryFile("w", suffix=".html", delete=False, encoding="utf-8") as tmp:
+        tmp.write(rendered_html)
+        tmp_path = Path(tmp.name)
+
+    try:
+        subprocess.run(
+            [
+                browser,
+                "--headless",
+                "--disable-gpu",
+                "--no-pdf-header-footer",
+                f"--print-to-pdf={target_pdf}",
+                tmp_path.as_uri(),
+            ],
+            check=True,
+            capture_output=True,
+        )
+        return Path(target_pdf).exists()
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 def generate_pdf(
@@ -190,9 +225,13 @@ def generate_pdf(
     target_pdf = str(output_pdf or default_pdf_path)
 
     rendered = render_html(custom_note=custom_note, muse_payload=muse_payload, user=u_cfg.slug)
-    from weasyprint import HTML
+    try:
+        from weasyprint import HTML
 
-    HTML(string=rendered).write_pdf(target_pdf)
+        HTML(string=rendered).write_pdf(target_pdf)
+    except Exception:
+        if not _write_pdf_fallback_browser(rendered, target_pdf):
+            raise
     return target_pdf
 
 
@@ -209,7 +248,7 @@ def print_briefing(
             subprocess.run(["lp", "-d", printer_name, pdf], check=True)
             print(f"Dispatched {pdf} to {printer_name}")
         else:
-            print(f"Notice: Printer '{printer_name}' not registered in CUPS yet. Saved at: {pdf}")
+            print(f"Notice: Printer '{printer_name}' not registered in CUPS yet. PDF saved at: {pdf}")
     except FileNotFoundError:
-        print(f"Notice: CUPS 'lpstat' not found on this OS. Saved at: {pdf}")
+        print(f"Notice: CUPS 'lpstat' not found on this OS. PDF saved at: {pdf}")
     return pdf
