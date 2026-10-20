@@ -5,6 +5,7 @@ Core digest context builder, PDF renderer, and CUPS print dispatcher.
 import calendar
 from datetime import date, datetime
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
