@@ -311,7 +311,37 @@ def generate_pdf(
     except Exception:
         if not _write_pdf_fallback_browser(rendered, target_pdf):
             raise
+
+    # Maintain persistent historical archive ledger
+    try:
+        update_archive_ledger(u_cfg.slug)
+    except Exception:
+        pass
+
     return target_pdf
+
+
+def update_archive_ledger(user_slug: str) -> Path:
+    """Scans the user's digest archive directory and maintains a persistent historical ledger."""
+    u_cfg = resolve_user(user_slug)
+    archive_dir = u_cfg.archive_dir
+    pdf_files = sorted(archive_dir.glob("*_Lumos_Digest.pdf"), reverse=True)
+
+    entries = []
+    for pdf in pdf_files:
+        dt_str = pdf.name.split("_")[0]
+        json_file = archive_dir / f"{dt_str}_Lumos_Digest.json"
+        entries.append({
+            "date": dt_str,
+            "filename": pdf.name,
+            "pdf_path": str(pdf.resolve()),
+            "size_bytes": pdf.stat().st_size,
+            "size_kb": round(pdf.stat().st_size / 1024, 1),
+        })
+
+    ledger_path = archive_dir / "archive_ledger.json"
+    ledger_path.write_text(json.dumps({"user": user_slug, "count": len(entries), "digests": entries}, indent=2), encoding="utf-8")
+    return ledger_path
 
 
 def print_briefing(
