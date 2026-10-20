@@ -25,6 +25,7 @@ from lumos.fetchers.google import (
     fetch_google_tasks,
     fetch_keep_notes,
 )
+from lumos.fetchers.minmax import resolve_today_workout
 from lumos.fetchers.normalizer import (
     normalize_emails,
     normalize_gcal_today,
@@ -187,7 +188,17 @@ def build_briefing_context(
     # 6. Garmin Monthly Gym & Biometrics
     garmin = payload.get("garmin") or fetch_garmin_stats(user=u_cfg.slug)
 
-    # 7. Year Progress (12-Month Visual Grid) & Dispatch Note
+    # 7. MinMax Workout Routine Resolution (if scheduled today in GCal or Tasks)
+    today_all_events = list(all_day) + [ev for slot in timeline for ev in slot["events"]]
+    minmax_workout = resolve_today_workout(
+        today_events=today_all_events,
+        tasks_todo=tasks_todo,
+        user=u_cfg.slug,
+        muse_payload=payload,
+        dt=today_dt,
+    )
+
+    # 8. Year Progress (12-Month Visual Grid) & Dispatch Note
     year_progress = compute_year_progress(today_dt)
     note = (
         custom_note
@@ -214,6 +225,7 @@ def build_briefing_context(
         "tasks_done": tasks_done,
         "keep_notes": keep_notes,
         "garmin": garmin,
+        "minmax_workout": minmax_workout,
         "year_progress": year_progress,
         "quote": payload.get("quote", "We are what we repeatedly do. Excellence, then, is not an act, but a habit."),
         "quote_author": payload.get("quote_author", "Aristotle"),

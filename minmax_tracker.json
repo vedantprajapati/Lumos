@@ -1,0 +1,66 @@
+{
+  "splits": {
+    "push": {
+      "title": "Push Hypertrophy",
+      "focus": "Chest, Front/Side Delts & Triceps",
+      "exercises": [
+        "Incline Dumbbell Press — 3 × 8–10 (RPE 8)",
+        "Flat Barbell Bench Press — 3 × 6–8 (Strength)",
+        "Standing Cable Lateral Raises — 4 × 12–15",
+        "Overhead Triceps Rope Extension — 3 × 10–12",
+        "Bodyweight Dips — 2 sets to technical failure"
+      ]
+    },
+    "pull": {
+      "title": "Pull & Posterior Chain",
+      "focus": "Lats, Upper Back, Rear Delts & Biceps",
+      "exercises": [
+        "Barbell Deadlift or RDL — 3 × 5–8",
+        "Neutral-Grip Lat Pulldowns — 3 × 8–10",
+        "Chest-Supported Chest Row — 3 × 10–12",
+        "Rear Delt Reverse Flyes — 4 × 12–15",
+        "Incline Dumbbell Bicep Curls — 3 × 10–12"
+      ]
+    },
+    "legs": {
+      "title": "Legs & Core Power",
+      "focus": "Quads, Hamstrings, Calves & Abs",
+      "exercises": [
+        "Barbell Back Squats — 4 × 6–8",
+        "Romanian Deadlifts (Dumbbells) — 3 × 8–10",
+        "Bulgarian Split Squats — 3 × 10 each leg",
+        "Standing Calf Raises — 4 × 15",
+        "Hanging Leg Raises / Core Planks — 3 sets"
+      ]
+    },
+    "upper": {
+      "title": "Upper Body MinMax",
+      "focus": "Chest, Back, Shoulders & Arms",
+      "exercises": [
+        "Barbell Overhead Press (OHP) — 3 × 6–8",
+        "Weighted Pull-ups or Lat Pulldowns — 3 × 8–10",
+        "Dumbbell Incline Bench Press — 3 × 8–10",
+        "Cable Face Pulls — 3 × 15",
+        "Super-set: Bicep Curls + Tricep Pushdowns — 3 × 12"
+      ]
+    },
+    "cardio": {
+      "title": "Cardio & Active Recovery",
+      "focus": "Zone 2 Engine & Mobility",
+      "exercises": [
+        "30–45 min Zone 2 Incline Treadmill or Cycling",
+        "Full-body dynamic hip & thoracic spine mobility",
+        "Core stability dead-bugs & bird-dogs — 3 sets"
+      ]
+    }
+  },
+  "weekly_schedule": {
+    "Monday": "push",
+    "Tuesday": "pull",
+    "Wednesday": "cardio",
+    "Thursday": "legs",
+    "Friday": "upper",
+    "Saturday": "legs",
+    "Sunday": "cardio"
+  }
+}

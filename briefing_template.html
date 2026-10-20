@@ -519,35 +519,38 @@
     flex-shrink: 0;
   }
   .yp-mini-cal {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 1.5px;
   }
   .yp-mini-cal td {
-    width: 7.8px;
-    height: 7.8px;
+    width: 7.5px;
+    height: 7.5px;
     padding: 0;
     text-align: center;
     vertical-align: middle;
     font-size: 4pt;
     line-height: 1;
+    box-sizing: border-box;
   }
   .yp-day-pad {
     border: none;
     background: transparent;
+    visibility: hidden;
   }
-  /* Crisp individual day square grid — no solid black blob! */
+  /* Distinct individual square blocks separated by 1.5px white space */
   .yp-day-past {
-    border: 0.5px solid #fff;
-    background: #111 !important;
+    border: 0.8px solid #000;
+    background: #000 !important;
     color: #fff !important;
   }
   .yp-day-today {
-    border: 1px solid #000;
+    border: 1.4px solid #000;
     background: #fff !important;
     color: #000 !important;
     font-weight: 900;
   }
   .yp-day-future {
-    border: 0.5px solid #444;
+    border: 0.8px solid #333;
     background: #fff !important;
     color: #000 !important;
   }
@@ -682,6 +685,24 @@
           <strong>Vitals:</strong> RHR {{ garmin.resting_hr }} bpm • Steps {{ garmin.steps_yesterday }} • Sleep {{ garmin.sleep_hours }}
         </div>
       </div>
+
+      {% if minmax_workout %}
+      <div class="section-banner">
+        <span>MinMax Split • {{ minmax_workout.day_name }}</span>
+        <span>{{ minmax_workout.focus }}</span>
+      </div>
+      <div class="framed-box" style="margin-bottom: 2px;">
+        <div class="box-header">
+          <span>{{ minmax_workout.title }}</span>
+          <span>Prescription</span>
+        </div>
+        <ul style="list-style: none; padding-left: 0; margin: 0; font-size: 5.4pt; line-height: 1.15;">
+          {% for ex in minmax_workout.exercises %}
+          <li style="border-bottom: 1px dotted #888; padding: 1.2px 0;">▸ {{ ex }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
     </div>
 
     <!-- COLUMN 2: The Morning Telegraph & Directives -->
