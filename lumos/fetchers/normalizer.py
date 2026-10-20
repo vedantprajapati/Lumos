@@ -69,8 +69,8 @@ def normalize_gcal_today(raw_events: List[Any]) -> Tuple[List[Dict[str, Any]], L
 
         ev_obj = {
             "time": str(t_str),
-            "title": str(title)[:42],
-            "location": str(loc)[:32],
+            "title": str(title)[:38],
+            "location": str(loc)[:28],
             "hour": hour,
             "all_day": is_all_day,
         }
@@ -99,12 +99,12 @@ def normalize_gcal_upcoming(raw_upcoming: List[Any]) -> List[Dict[str, str]]:
             parts = item.split("—", 1) if "—" in item else item.split("-", 1)
             day_time = parts[0].strip()
             title = parts[1].strip() if len(parts) > 1 else item
-            out.append({"day": day_time[:14], "time": "", "title": title[:44]})
+            out.append({"day": day_time[:14], "time": "", "title": title[:40]})
         elif isinstance(item, dict):
             day = item.get("day") or item.get("date") or ""
             time = item.get("time") or item.get("start") or ""
             title = item.get("title") or item.get("summary") or "Upcoming Event"
-            out.append({"day": str(day)[:12], "time": str(time)[:10], "title": str(title)[:44]})
+            out.append({"day": str(day)[:12], "time": str(time)[:10], "title": str(title)[:40]})
     return out[:6]
 
 
@@ -114,9 +114,9 @@ def normalize_emails(raw_emails: List[Any]) -> List[Dict[str, str]]:
         if isinstance(item, str):
             if ":" in item:
                 sender, subj = item.split(":", 1)
-                out.append({"sender": sender.strip()[:18], "subject": subj.strip()[:55]})
+                out.append({"sender": sender.strip()[:18], "subject": subj.strip()[:50]})
             else:
-                out.append({"sender": "Update", "subject": item.strip()[:55]})
+                out.append({"sender": "Update", "subject": item.strip()[:50]})
         elif isinstance(item, dict):
             sender = (
                 item.get("sender")
@@ -133,9 +133,19 @@ def normalize_emails(raw_emails: List[Any]) -> List[Dict[str, str]]:
             )
             out.append({
                 "sender": str(sender).split("<")[0].replace('"', "").strip()[:18],
-                "subject": str(subject).strip()[:55],
+                "subject": str(subject).strip()[:50],
             })
     return out[:4]
+
+
+def _clean_task_title(val: Any) -> str:
+    s = str(val or "").strip()
+    if len(s) > 42:
+        cutoff = s[:42].rfind(" ")
+        if cutoff > 25:
+            return s[:cutoff] + "..."
+        return s[:40] + "..."
+    return s
 
 
 def normalize_tasks(raw_payload: Dict[str, Any]) -> Tuple[List[str], List[str]]:
@@ -144,20 +154,20 @@ def normalize_tasks(raw_payload: Dict[str, Any]) -> Tuple[List[str], List[str]]:
 
     for t in raw_payload.get("tasks_todo") or []:
         if isinstance(t, dict):
-            todo.append(str(t.get("title") or t.get("text") or "").strip())
+            todo.append(_clean_task_title(t.get("title") or t.get("text")))
         else:
-            todo.append(str(t).strip())
+            todo.append(_clean_task_title(t))
 
     for t in raw_payload.get("tasks_done") or []:
         if isinstance(t, dict):
-            done.append(str(t.get("title") or t.get("text") or "").strip())
+            done.append(_clean_task_title(t.get("title") or t.get("text")))
         else:
-            done.append(str(t).strip())
+            done.append(_clean_task_title(t))
 
     combined = raw_payload.get("tasks") or raw_payload.get("google_tasks") or []
     for item in combined:
         if isinstance(item, dict):
-            title = str(item.get("title") or item.get("name") or "").strip()
+            title = _clean_task_title(item.get("title") or item.get("name"))
             status = str(item.get("status") or "").lower()
             is_done = bool(item.get("done") or item.get("completed") or status in ("completed", "done"))
             if is_done:
@@ -165,9 +175,9 @@ def normalize_tasks(raw_payload: Dict[str, Any]) -> Tuple[List[str], List[str]]:
             else:
                 todo.append(title)
         elif isinstance(item, str) and not todo:
-            todo.append(item.strip())
+            todo.append(_clean_task_title(item))
 
-    return [x[:48] for x in todo if x][:5], [x[:48] for x in done if x][:3]
+    return [x for x in todo if x][:5], [x for x in done if x][:3]
 
 
 def normalize_keep_notes(raw_keep: List[Any]) -> List[Dict[str, str]]:
@@ -176,14 +186,14 @@ def normalize_keep_notes(raw_keep: List[Any]) -> List[Dict[str, str]]:
         if isinstance(item, str):
             if ":" in item:
                 title, body = item.split(":", 1)
-                out.append({"title": title.strip()[:24], "snippet": body.strip()[:90]})
+                out.append({"title": title.strip()[:24], "snippet": body.strip()[:80]})
             else:
-                out.append({"title": "KEEP NOTE", "snippet": item.strip()[:90]})
+                out.append({"title": "KEEP NOTE", "snippet": item.strip()[:80]})
         elif isinstance(item, dict):
             title = item.get("title") or item.get("label") or "KEEP NOTE"
             snippet = item.get("snippet") or item.get("text") or item.get("body") or item.get("content") or ""
             out.append({
                 "title": str(title).strip()[:24],
-                "snippet": str(snippet).replace("\n", " • ").strip()[:90],
+                "snippet": str(snippet).replace("\n", " • ").strip()[:80],
             })
     return out[:3]
