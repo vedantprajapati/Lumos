@@ -130,6 +130,18 @@ python3 executor.py --no-print
 
 ---
 
+## ⏰ Autonomous Scheduling & Persistence
+
+Lumos runs completely autonomously on the Raspberry Pi without requiring any phone trigger:
+
+- **Daily 6:00 AM Morning Run (`lumos-daily.timer`)**:
+  - Automatically compiles the day's broadsheet at **6:00 AM daily**, sends the print job to the Phomemo M834, and uploads the PDF artifact to your Muse chat.
+  - **Power-Off Resilience (`Persistent=true`)**: If the Pi is turned off or unplugged at 6:00 AM, systemd detects the missed window and triggers the run **immediately upon powering back on**.
+- **6-Hour Git Auto-Sync (`lumos-sync.timer`)**:
+  - Pulls down new commits from `origin/main` every 6 hours and on system boot (`scripts/sync_main.sh`).
+
+---
+
 ## 🖨️ Hardware & Printer Setup (Phomemo M834)
 
 The **Phomemo M834** connects over USB or Bluetooth to the Raspberry Pi.
