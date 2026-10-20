@@ -5,6 +5,11 @@ credentials.json
 .garth/
 garmin_tokens/
 .muse_cache.json
+lumos-ui/calendar-tokens.json
+lumos-ui/lumos.log
+lumos-ui/window-state.json
+lumos-ui/node_modules/
+lumos-ui/dist/
 
 # Python
 __pycache__/
