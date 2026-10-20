@@ -48,6 +48,22 @@
     text-align: center;
     padding: 2px 0 2px 0;
   }
+  .masthead-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 1px 0;
+  }
+  .masthead-crest {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: grayscale(100%) contrast(150%);
+  }
+  .masthead-center {
+    text-align: center;
+  }
   .motto {
     font-family: 'Georgia', serif;
     font-style: italic;
@@ -617,8 +633,18 @@
   <!-- Grand Masthead -->
   <div class="masthead-wrap">
     <div class="motto">"All the News, Schedule, Weather & Athletic Telemetry Fit to Print on Demand"</div>
-    <div class="masthead">The Lumos Chronicle</div>
-    <div class="masthead-sub">{{ user_display }}'s Morning Dispatch & Personal Gazette</div>
+    <div class="masthead-header-row">
+      {% if logo_data_uri %}
+      <img src="{{ logo_data_uri }}" class="masthead-crest" alt="Lumos Crest">
+      {% endif %}
+      <div class="masthead-center">
+        <div class="masthead">The Lumos Chronicle</div>
+        <div class="masthead-sub">{{ user_display }}'s Morning Dispatch & Personal Gazette</div>
+      </div>
+      {% if logo_data_uri %}
+      <img src="{{ logo_data_uri }}" class="masthead-crest" alt="Lumos Crest">
+      {% endif %}
+    </div>
   </div>
 
   <!-- Meta Dateline Strip -->

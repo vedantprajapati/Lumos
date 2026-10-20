@@ -208,6 +208,17 @@ def build_briefing_context(
         or "All local services healthy. GPIO 17 listener armed and CUPS print spooler active."
     )
 
+    # 8. Lumos Logo data URI
+    logo_data_uri = ""
+    for lp in [BASE_DIR / "docs" / "assets" / "logo.png", BASE_DIR / "lumos-ui" / "logo.png"]:
+        if lp.exists():
+            try:
+                b64 = base64.b64encode(lp.read_bytes()).decode("ascii")
+                logo_data_uri = f"data:image/png;base64,{b64}"
+                break
+            except Exception:
+                pass
+
     return {
         "user_slug": u_cfg.slug,
         "user_display": u_cfg.display_name,
@@ -231,6 +242,7 @@ def build_briefing_context(
         "quote": payload.get("quote", "We are what we repeatedly do. Excellence, then, is not an act, but a habit."),
         "quote_author": payload.get("quote_author", "Aristotle"),
         "muse_note": note,
+        "logo_data_uri": logo_data_uri,
     }
 
 
