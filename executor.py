@@ -122,12 +122,83 @@ def handle_briefing_request(payload: Dict[str, Any], user: str = "vedant", print
     }
 
 
+def get_archive_summary(user: str = "vedant", send_to_muse: bool = False) -> Dict[str, Any]:
+    """Returns a formatted archive ledger of all previous daily digests."""
+    u_cfg = resolve_user(user)
+    ledger_path = u_cfg.archive_dir / "archive_ledger.json"
+    if not ledger_path.exists():
+        from lumos.renderer import update_archive_ledger
+        ledger_path = update_archive_ledger(u_cfg.slug)
+    try:
+        data = json.loads(ledger_path.read_text(encoding="utf-8"))
+    except Exception:
+        data = {"count": 0, "digests": []}
+
+    lines = [
+        f"📚 *The Lumos Chronicle — Gazette Archive* ({data.get('count', 0)} editions)",
+        "────────────────────────────────",
+    ]
+    for d in data.get("digests", []):
+        lines.append(f"• *{d.get('date')}*: {d.get('filename')} ({d.get('size_kb', 0)} KB)")
+    lines.append("────────────────────────────────")
+    lines.append("Ask me for any past date (e.g. 'Send me Oct 19 digest') to upload that edition!")
+    summary_text = "\n".join(lines)
+
+    muse_res = None
+    if send_to_muse:
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+                sock.settimeout(30)
+                sock.connect(MUSE_SOCKET_PATH)
+                sock.sendall(json.dumps({"message": summary_text}).encode() + b"\n")
+                muse_res = json.loads(sock.makefile("rb").readline().decode("utf-8", errors="replace"))
+        except Exception as e:
+            muse_res = {"ok": False, "error": str(e)}
+
+    return {
+        "ok": True,
+        "summary": summary_text,
+        "count": data.get("count", 0),
+        "digests": data.get("digests", []),
+        "muse_res": muse_res,
+    }
+
+
+def resend_archive_pdf(date_str: str, user: str = "vedant") -> Dict[str, Any]:
+    """Uploads a specific past edition PDF from the archive directly to Muse chat."""
+    u_cfg = resolve_user(user)
+    pdf_path = u_cfg.archive_dir / f"{date_str}_Lumos_Digest.pdf"
+    if not pdf_path.exists():
+        matches = list(u_cfg.archive_dir.glob(f"*{date_str}*.pdf"))
+        if matches:
+            pdf_path = matches[0]
+        else:
+            return {"ok": False, "error": f"No archive digest found for date: {date_str}"}
+
+    msg = f"🗞️ *The Lumos Chronicle — Archived Edition ({date_str})*\nAttached is the requested past PDF broadsheet."
+    upload_res = send_pdf_to_muse(msg, pdf_path)
+    return {"ok": True, "date": date_str, "pdf_path": str(pdf_path), "muse_upload": upload_res}
+
+
 def main():
     parser = argparse.ArgumentParser(description="Lumos RPC & PDF Messenger")
     parser.add_argument("--payload", help="JSON payload or path to JSON file from Muse", default="{}")
     parser.add_argument("--user", default="vedant", help="User profile name")
     parser.add_argument("--no-print", action="store_true", help="Skip sending to CUPS")
+    parser.add_argument("--archive", action="store_true", help="List all previous daily digests in the archive")
+    parser.add_argument("--resend", help="Resend/upload a specific past PDF by date (YYYY-MM-DD) to Muse chat")
+    parser.add_argument("--send-chat", action="store_true", help="Post output directly to Muse chat")
     args = parser.parse_args()
+
+    if args.archive:
+        res = get_archive_summary(user=args.user, send_to_muse=args.send_chat)
+        print(json.dumps(res, indent=2))
+        return
+
+    if args.resend:
+        res = resend_archive_pdf(args.resend, user=args.user)
+        print(json.dumps(res, indent=2))
+        return
 
     payload_data = {}
     if args.payload:
