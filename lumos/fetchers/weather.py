@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
 Deterministic Open-Meteo Weather Fetcher (0 AI API calls).
-Fetches weather for both:
-  1. Home: 11 Blazing Star St, East Gwillimbury, ON (44.1008, -79.4397)
-  2. City: Downtown Toronto, ON (43.6532, -79.3832)
+Fetches weather for both Home (East Gwillimbury) and Downtown Toronto.
 """
-import os
 from datetime import datetime
+from typing import Any, Dict
 import requests
+from lumos.config import LocationCoords, get_locations
 
 WMO_CODES = {
     0: "Clear Sky",
@@ -32,9 +31,9 @@ WMO_CODES = {
 }
 
 
-def _fetch_single_location(name: str, lat: str, lon: str) -> dict:
+def _fetch_location(loc: LocationCoords) -> Dict[str, Any]:
     url = (
-        f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+        f"https://api.open-meteo.com/v1/forecast?latitude={loc.lat}&longitude={loc.lon}"
         "&current=temperature_2m,precipitation,weather_code,wind_speed_10m"
         "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto"
     )
@@ -54,7 +53,7 @@ def _fetch_single_location(name: str, lat: str, lon: str) -> dict:
 
         code = curr.get("weather_code", 0)
         return {
-            "name": name,
+            "name": loc.name,
             "temp": round(curr["temperature_2m"]),
             "condition": WMO_CODES.get(code, "Cloudy / Showers" if code >= 3 else "Clear / Mild"),
             "temp_max": round(daily["temperature_2m_max"][0]),
@@ -67,7 +66,7 @@ def _fetch_single_location(name: str, lat: str, lon: str) -> dict:
         }
     except Exception:
         return {
-            "name": name,
+            "name": loc.name,
             "temp": 14,
             "condition": "Partly Cloudy",
             "temp_max": 16,
@@ -80,18 +79,10 @@ def _fetch_single_location(name: str, lat: str, lon: str) -> dict:
         }
 
 
-def fetch_weather() -> dict:
-    home_name = os.getenv("HOME_LOCATION_NAME", "East Gwillimbury")
-    home_lat = os.getenv("HOME_LAT", "44.1008")
-    home_lon = os.getenv("HOME_LON", "-79.4397")
-
-    tor_name = os.getenv("TORONTO_LOCATION_NAME", "Downtown Toronto")
-    tor_lat = os.getenv("TORONTO_LAT", "43.6532")
-    tor_lon = os.getenv("TORONTO_LON", "-79.3832")
-
-    home = _fetch_single_location(home_name, home_lat, home_lon)
-    toronto = _fetch_single_location(tor_name, tor_lat, tor_lon)
-
+def fetch_weather() -> Dict[str, Any]:
+    home_coords, toronto_coords = get_locations()
+    home = _fetch_location(home_coords)
+    toronto = _fetch_location(toronto_coords)
     return {
         "home": home,
         "toronto": toronto,

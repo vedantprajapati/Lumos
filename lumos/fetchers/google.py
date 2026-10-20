@@ -1,78 +1,35 @@
 #!/usr/bin/env python3
 """
-Deterministic Google Workspace fetchers (0 AI API calls):
-- Google Calendar: Today (mapped to hourly timeline 7 AM - 9 PM) + Next 7 Days
-- Google Tasks: To-Do and Completed tasks
-- Gmail: Recent unread/important primary inbox threads
-- Google Keep: Pinned/important notes (via gkeepapi or local cache)
+Deterministic Google Workspace fallback fetchers (0 AI API calls).
+Used when running standalone without a cached Muse RPC payload.
 """
-import json
-import os
 from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
-
-SCOPES = [
-    "https://www.googleapis.com/auth/calendar.readonly",
-    "https://www.googleapis.com/auth/tasks.readonly",
-    "https://www.googleapis.com/auth/gmail.readonly",
-]
-
-TIMELINE_HOURS = list(range(7, 22))  # 7 AM to 9 PM (21:00)
+from typing import Any, Dict, List, Optional
+from lumos.config import resolve_user
+from lumos.fetchers.normalizer import normalize_gcal_today
 
 
-def _get_google_creds():
-    token_file = os.path.join(BASE_DIR, "token.json")
-    if not os.path.exists(token_file):
+def _get_google_creds(user: Optional[str] = None):
+    u_cfg = resolve_user(user)
+    if not u_cfg.google_token_path.exists():
         return None
     try:
         from google.oauth2.credentials import Credentials
-        return Credentials.from_authorized_user_file(token_file)
+        return Credentials.from_authorized_user_file(str(u_cfg.google_token_path))
     except Exception:
         return None
 
 
-def build_hourly_timeline(today_events):
-    """
-    Maps today's events onto a 7 AM - 9 PM hourly ruler (like the receipt printer photo).
-    Each slot has: {"hour_label": "7 AM", "events": [{"time": "09:00-10:00", "title": "...", "location": "..."}]}
-    """
-    slots = {h: [] for h in TIMELINE_HOURS}
-    all_day = []
-
-    for ev in today_events:
-        if ev.get("all_day"):
-            all_day.append(ev)
-            continue
-        hour = ev.get("hour", 9)
-        clamped = max(7, min(21, hour))
-        slots[clamped].append(ev)
-
-    timeline = []
-    for h in TIMELINE_HOURS:
-        suffix = "AM" if h < 12 else "PM"
-        h12 = h if h <= 12 else h - 12
-        timeline.append({
-            "hour": h,
-            "label": f"{h12} {suffix}",
-            "events": slots[h],
-        })
-    return all_day, timeline
-
-
-def fetch_gcal_events():
-    """Fetches Today's events and Next 7 Days events with 0 AI calls."""
-    creds = _get_google_creds()
+def fetch_gcal_events(user: Optional[str] = None) -> Dict[str, Any]:
+    creds = _get_google_creds(user)
     if not creds:
         today_sample = [
             {"time": "09:00 AM - 09:30 AM", "title": "Platform Standup & Sync", "location": "Meet", "hour": 9, "all_day": False},
             {"time": "11:00 AM - 12:30 PM", "title": "Architecture Deep Dive: Lumos", "location": "Focus Block", "hour": 11, "all_day": False},
             {"time": "02:00 PM - 03:00 PM", "title": "PR Code Review & Diagnostics", "location": "GitHub", "hour": 14, "all_day": False},
-            {"time": "05:30 PM - 06:45 PM", "title": "Gym — Strength & Conditioning", "location": "Fitness Club", "hour": 17, "all_day": False},
+            {"time": "05:30 PM - 06:45 PM", "title": "Gym — Strength & Conditioning", "location": "East Gwillimbury", "hour": 17, "all_day": False},
         ]
-        all_day, timeline = build_hourly_timeline(today_sample)
+        all_day, timeline = normalize_gcal_today(today_sample)
         upcoming_sample = [
             {"day": "Wed", "time": "10:00 AM", "title": "Sprint Planning & Backlog Grooming"},
             {"day": "Thu", "time": "02:00 PM", "title": "Hardware Telemetry Demo"},
@@ -147,15 +104,15 @@ def fetch_gcal_events():
                     "title": summary,
                 })
 
-        all_day, timeline = build_hourly_timeline(today_events)
+        all_day, timeline = normalize_gcal_today(today_events)
         return {
             "today_events": today_events,
             "all_day": all_day,
             "timeline": timeline,
-            "upcoming_7d": upcoming_7d[:7],
+            "upcoming_7d": upcoming_7d[:6],
         }
     except Exception as e:
-        all_day, timeline = build_hourly_timeline([])
+        all_day, timeline = normalize_gcal_today([])
         return {
             "today_events": [{"time": "Notice", "title": f"Calendar error: {e}", "location": "", "hour": 9, "all_day": False}],
             "all_day": all_day,
@@ -164,9 +121,8 @@ def fetch_gcal_events():
         }
 
 
-def fetch_google_tasks():
-    """Fetches To-Do and recently Completed tasks from Google Tasks API."""
-    creds = _get_google_creds()
+def fetch_google_tasks(user: Optional[str] = None) -> Dict[str, List[str]]:
+    creds = _get_google_creds(user)
     if not creds:
         return {
             "todo": [
@@ -201,14 +157,13 @@ def fetch_google_tasks():
                     done.append(title)
                 else:
                     todo.append(title)
-        return {"todo": todo[:6], "done": done[:4]}
+        return {"todo": todo[:5], "done": done[:3]}
     except Exception:
         return {"todo": ["Google Tasks scope not authorized in token.json"], "done": []}
 
 
-def fetch_gmail_updates():
-    """Fetches top unread/important primary Gmail headers (Sender + Subject)."""
-    creds = _get_google_creds()
+def fetch_gmail_updates(user: Optional[str] = None) -> List[Dict[str, str]]:
+    creds = _get_google_creds(user)
     if not creds:
         return [
             {"sender": "GitHub", "subject": "[Lumos] CI build passed on main branch"},
@@ -242,36 +197,7 @@ def fetch_gmail_updates():
         return [{"sender": "Gmail", "subject": "Authorize gmail.readonly in token.json"}]
 
 
-def fetch_keep_notes():
-    """Fetches pinned/important Google Keep notes from local cache or gkeepapi."""
-    keep_cache = os.path.join(BASE_DIR, "keep_notes.json")
-    if os.path.exists(keep_cache):
-        try:
-            with open(keep_cache, encoding="utf-8") as f:
-                return json.load(f)[:3]
-        except Exception:
-            pass
-
-    keep_user = os.getenv("GOOGLE_KEEP_USERNAME", "").strip()
-    keep_token = os.getenv("GOOGLE_KEEP_MASTER_TOKEN", "").strip()
-    if keep_user and keep_token:
-        try:
-            import gkeepapi
-
-            keep = gkeepapi.Keep()
-            keep.authenticate(keep_user, keep_token)
-            notes = []
-            for n in keep.all():
-                if n.pinned and not n.trashed and not n.archived:
-                    notes.append({
-                        "title": (n.title or "Pinned Note")[:28],
-                        "snippet": (n.text or "").replace("\n", " • ")[:90],
-                    })
-            if notes:
-                return notes[:3]
-        except Exception:
-            pass
-
+def fetch_keep_notes() -> List[Dict[str, str]]:
     return [
-        {"title": "Pinned Focus", "snippet": "Prioritize deep work before noon; log gym sessions via Garmin."},
+        {"title": "PINNED FOCUS", "snippet": "Prioritize deep work before noon; log gym sessions via Garmin."},
     ]

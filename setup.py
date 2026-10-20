@@ -11,18 +11,18 @@ requirements = [
 
 setup(
     name="lumos",
-    version="0.1.0",
-    description="Automated 1-page morning broadsheet printer and Meta Muse gadget interface for the Phomemo M834 thermal printer on Raspberry Pi 3B.",
+    version="0.2.0",
+    description="Automated multi-user 1-page morning broadsheet printer for the Phomemo M834 thermal printer on Raspberry Pi 3B.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Vedant Prajapati",
     python_requires=">=3.9",
-    packages=find_packages(include=["fetchers", "fetchers.*"]),
+    packages=find_packages(include=["lumos", "lumos.*"]),
     py_modules=["generate_and_print", "button_daemon", "executor"],
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "lumos-print=generate_and_print:print_briefing",
+            "lumos-print=generate_and_print:main",
             "lumos-button=button_daemon:main",
             "lumos-executor=executor:main",
         ],

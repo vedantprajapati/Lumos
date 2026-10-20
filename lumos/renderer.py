@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""
+Core digest context builder, HTML/PDF renderer, and CUPS print dispatcher.
+"""
+from datetime import datetime
+import json
+import subprocess
+from typing import Any, Dict, Optional
+from jinja2 import Template
+
+from lumos.config import (
+    TEMPLATE_PATH,
+    get_daily_artifact_paths,
+    get_printer_name,
+    resolve_user,
+)
+from lumos.fetchers.garmin import fetch_garmin_stats
+from lumos.fetchers.google import (
+    fetch_gcal_events,
+    fetch_gmail_updates,
+    fetch_google_tasks,
+    fetch_keep_notes,
+)
+from lumos.fetchers.normalizer import (
+    normalize_emails,
+    normalize_gcal_today,
+    normalize_gcal_upcoming,
+    normalize_keep_notes,
+    normalize_tasks,
+)
+from lumos.fetchers.weather import fetch_weather
+
+
+def format_ordinal_date(dt: datetime) -> str:
+    day = dt.day
+    if 11 <= (day % 100) <= 13:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+    return f"{dt.strftime('%B')} {day}{suffix} {dt.year}"
+
+
+def compute_year_progress(dt: datetime) -> Dict[str, Any]:
+    day_of_year = dt.timetuple().tm_yday
+    total_days = 366 if (dt.year % 4 == 0 and (dt.year % 100 != 0 or dt.year % 400 == 0)) else 365
+    pct = round((day_of_year / total_days) * 100)
+    return {
+        "day_of_year": day_of_year,
+        "total_days": total_days,
+        "percent": pct,
+    }
+
+
+def _load_or_save_daily_payload(
+    user_slug: str,
+    muse_payload: Optional[Dict[str, Any]],
+    dt: datetime,
+) -> Dict[str, Any]:
+    _, _, json_path = get_daily_artifact_paths(user_slug, dt)
+    existing: Dict[str, Any] = {}
+    if json_path.exists():
+        try:
+            existing = json.loads(json_path.read_text(encoding="utf-8"))
+        except Exception:
+            existing = {}
+
+    if muse_payload:
+        merged = {**existing, **muse_payload}
+        json_path.write_text(json.dumps(merged, indent=2), encoding="utf-8")
+        return merged
+
+    if not json_path.exists():
+        json_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+    return existing
+
+
+def build_briefing_context(
+    custom_note: str = "",
+    muse_payload: Optional[Dict[str, Any]] = None,
+    user: Optional[str] = None,
+) -> Dict[str, Any]:
+    raw_user = user or (muse_payload or {}).get("user")
+    u_cfg = resolve_user(raw_user)
+    today_dt = datetime.now()
+    payload = _load_or_save_daily_payload(u_cfg.slug, muse_payload, today_dt)
+    ordinal_date = format_ordinal_date(today_dt)
+
+    # 1. Dual-Location Weather (East Gwillimbury + Downtown Toronto)
+    weather = payload.get("weather") or fetch_weather()
+
+    # 2. Google Calendar: Today (Hourly Timeline 7 AM - 9 PM) + Next 7 Days
+    raw_today = payload.get("gcal_today") or payload.get("events")
+    raw_upcoming = payload.get("gcal_upcoming") or payload.get("gcal_next_7_days")
+
+    if raw_today is not None or raw_upcoming is not None:
+        all_day, timeline = normalize_gcal_today(raw_today or [])
+        gcal_upcoming = normalize_gcal_upcoming(raw_upcoming or [])
+    else:
+        gcal_data = fetch_gcal_events(user=u_cfg.slug)
+        all_day = gcal_data["all_day"]
+        timeline = gcal_data["timeline"]
+        gcal_upcoming = gcal_data["upcoming_7d"][:6]
+
+    # 3. Google Tasks: To-Do & Done
+    if any(k in payload for k in ("tasks_todo", "tasks_done", "tasks", "google_tasks")):
+        tasks_todo, tasks_done = normalize_tasks(payload)
+    else:
+        tasks_data = fetch_google_tasks(user=u_cfg.slug)
+        tasks_todo = tasks_data["todo"][:5]
+        tasks_done = tasks_data["done"][:3]
+
+    # 4. Gmail & Outlook Updates
+    raw_gmail = payload.get("gmail_updates") or payload.get("gmail")
+    gmail_updates = (
+        normalize_emails(raw_gmail)
+        if raw_gmail is not None
+        else fetch_gmail_updates(user=u_cfg.slug)[:4]
+    )
+
+    raw_outlook = payload.get("outlook_updates") or payload.get("outlook")
+    outlook_updates = (
+        normalize_emails(raw_outlook)
+        if raw_outlook is not None
+        else [{"sender": "Outlook", "subject": "No unread priority Outlook threads"}]
+    )
+
+    # 5. Google Keep Notes
+    raw_keep = payload.get("keep_notes") or payload.get("keep") or payload.get("google_keep")
+    keep_notes = normalize_keep_notes(raw_keep) if raw_keep is not None else fetch_keep_notes()[:3]
+
+    # 6. Garmin Monthly Gym & Biometrics
+    garmin = payload.get("garmin") or fetch_garmin_stats(user=u_cfg.slug)
+
+    # 7. Year Progress & Dispatch Note
+    year_progress = compute_year_progress(today_dt)
+    note = (
+        custom_note
+        or payload.get("note")
+        or payload.get("muse_note")
+        or "All local services healthy. GPIO 17 listener armed and CUPS print spooler active."
+    )
+
+    return {
+        "user_slug": u_cfg.slug,
+        "user_display": u_cfg.display_name,
+        "header_title": f"Lumos Digest - {u_cfg.display_name} - {ordinal_date}",
+        "ordinal_date": ordinal_date,
+        "date_str": today_dt.strftime("%A, %B %d, %Y"),
+        "short_date": today_dt.strftime("%a, %b %d"),
+        "location_name": "11 Blazing Star St, East Gwillimbury • Downtown Toronto",
+        "weather": weather,
+        "all_day_events": all_day[:2],
+        "timeline": timeline,
+        "gcal_upcoming": gcal_upcoming,
+        "gmail_updates": gmail_updates,
+        "outlook_updates": outlook_updates,
+        "tasks_todo": tasks_todo,
+        "tasks_done": tasks_done,
+        "keep_notes": keep_notes,
+        "garmin": garmin,
+        "year_progress": year_progress,
+        "quote": payload.get("quote", "We are what we repeatedly do. Excellence, then, is not an act, but a habit."),
+        "quote_author": payload.get("quote_author", "Aristotle"),
+        "muse_note": note,
+    }
+
+
+def render_html(
+    custom_note: str = "",
+    muse_payload: Optional[Dict[str, Any]] = None,
+    user: Optional[str] = None,
+) -> str:
+    ctx = build_briefing_context(custom_note=custom_note, muse_payload=muse_payload, user=user)
+    rendered = Template(TEMPLATE_PATH.read_text(encoding="utf-8")).render(**ctx)
+
+    _, html_path, _ = get_daily_artifact_paths(ctx["user_slug"])
+    html_path.write_text(rendered, encoding="utf-8")
+    return rendered
+
+
+def generate_pdf(
+    output_pdf: Optional[str] = None,
+    custom_note: str = "",
+    muse_payload: Optional[Dict[str, Any]] = None,
+    user: Optional[str] = None,
+) -> str:
+    raw_user = user or (muse_payload or {}).get("user")
+    u_cfg = resolve_user(raw_user)
+    default_pdf_path, _, _ = get_daily_artifact_paths(u_cfg.slug)
+    target_pdf = str(output_pdf or default_pdf_path)
+
+    rendered = render_html(custom_note=custom_note, muse_payload=muse_payload, user=u_cfg.slug)
+    from weasyprint import HTML
+
+    HTML(string=rendered).write_pdf(target_pdf)
+    return target_pdf
+
+
+def print_briefing(
+    custom_note: str = "",
+    muse_payload: Optional[Dict[str, Any]] = None,
+    user: Optional[str] = None,
+) -> str:
+    printer_name = get_printer_name()
+    pdf = generate_pdf(custom_note=custom_note, muse_payload=muse_payload, user=user)
+    try:
+        check = subprocess.run(["lpstat", "-p", printer_name], capture_output=True, text=True)
+        if check.returncode == 0:
+            subprocess.run(["lp", "-d", printer_name, pdf], check=True)
+            print(f"Dispatched {pdf} to {printer_name}")
+        else:
+            print(f"Notice: Printer '{printer_name}' not registered in CUPS yet. Saved at: {pdf}")
+    except FileNotFoundError:
+        print(f"Notice: CUPS 'lpstat' not found on this OS. Saved at: {pdf}")
+    return pdf

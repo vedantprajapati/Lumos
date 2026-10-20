@@ -1,18 +1,6 @@
 #!/usr/bin/env python3
 """
-Pluggable adapter & schema normalizer for Meta Muse RPC tool-call outputs.
-
-Meta Muse accesses connected tools in the cloud:
-  - Gmail updates (`gmail` / `gmail_updates`)
-  - Outlook email updates (`outlook` / `outlook_updates`)
-  - Google Calendar today (`events` / `gcal_today`)
-  - Google Calendar next 7 days (`gcal_upcoming` / `gcal_next_7_days`)
-  - Google Tasks to-do & done (`tasks_todo`, `tasks_done`, or `tasks`)
-  - Google Keep notes (`keep` / `keep_notes`)
-  - Optional summary note (`note`)
-
-This module accepts raw tool-call dicts, strings, or structured objects from Muse
-and normalizes them into the exact shape required by `briefing_template.html`.
+Pluggable adapter & schema normalizer for Muse RPC tool-call outputs.
 """
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
@@ -21,14 +9,12 @@ TIMELINE_HOURS = list(range(7, 22))  # 7 AM to 9 PM (21:00)
 
 
 def _parse_hour(time_str: str) -> Tuple[int, bool]:
-    """Extracts 24-hour integer (7..21) and all_day boolean from any time string."""
     if not time_str:
         return 9, False
     t_clean = time_str.strip()
     if "all day" in t_clean.lower() or "all-day" in t_clean.lower():
         return 8, True
 
-    # Handle ISO datetime strings e.g. "2026-10-19T14:30:00-04:00"
     if "T" in t_clean and len(t_clean) >= 13:
         try:
             dt = datetime.fromisoformat(t_clean)
@@ -36,7 +22,6 @@ def _parse_hour(time_str: str) -> Tuple[int, bool]:
         except Exception:
             pass
 
-    # Handle "09:00 AM - 10:00 AM", "9:30 AM", "14:00"
     start_part = t_clean.split("-")[0].split("–")[0].strip()
     for fmt in ("%I:%M %p", "%I %p", "%H:%M"):
         try:
@@ -48,13 +33,6 @@ def _parse_hour(time_str: str) -> Tuple[int, bool]:
 
 
 def normalize_gcal_today(raw_events: List[Any]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    """
-    Normalizes Muse's today calendar tool output and maps onto the 7 AM - 9 PM timeline.
-    Accepts items like:
-      - {"time": "9:00 AM - 10:00 AM", "title": "Standup", "location": "Meet"}
-      - {"start": "2026-10-19T09:00:00", "summary": "Standup"}
-      - "9:00 AM: Standup"
-    """
     slots = {h: [] for h in TIMELINE_HOURS}
     all_day = []
 
@@ -115,10 +93,6 @@ def normalize_gcal_today(raw_events: List[Any]) -> Tuple[List[Dict[str, Any]], L
 
 
 def normalize_gcal_upcoming(raw_upcoming: List[Any]) -> List[Dict[str, str]]:
-    """
-    Normalizes Muse's next-7-days calendar tool output.
-    Accepts dicts (`{"day": "Wed Oct 21", "time": "2:00 PM", "title": "..."}`) or strings.
-    """
     out = []
     for item in raw_upcoming or []:
         if isinstance(item, str):
@@ -135,10 +109,6 @@ def normalize_gcal_upcoming(raw_upcoming: List[Any]) -> List[Dict[str, str]]:
 
 
 def normalize_emails(raw_emails: List[Any]) -> List[Dict[str, str]]:
-    """
-    Normalizes Muse's Gmail or Outlook tool output.
-    Accepts dicts (`{"sender": "...", "subject": "..."}` or `{"from": "...", "snippet": "..."}`) or strings.
-    """
     out = []
     for item in raw_emails or []:
         if isinstance(item, str):
@@ -169,12 +139,6 @@ def normalize_emails(raw_emails: List[Any]) -> List[Dict[str, str]]:
 
 
 def normalize_tasks(raw_payload: Dict[str, Any]) -> Tuple[List[str], List[str]]:
-    """
-    Normalizes Muse's Google Tasks tool output into (tasks_todo, tasks_done).
-    Supports:
-      - Separate `tasks_todo` and `tasks_done` lists
-      - Single `tasks` / `google_tasks` list of dicts with `{"title": "...", "status": "completed"|"needsAction"|"done"}`
-    """
     todo: List[str] = []
     done: List[str] = []
 
@@ -207,9 +171,6 @@ def normalize_tasks(raw_payload: Dict[str, Any]) -> Tuple[List[str], List[str]]:
 
 
 def normalize_keep_notes(raw_keep: List[Any]) -> List[Dict[str, str]]:
-    """
-    Normalizes Muse's Google Keep tool output into `[{"title": "...", "snippet": "..."}]`.
-    """
     out = []
     for item in raw_keep or []:
         if isinstance(item, str):

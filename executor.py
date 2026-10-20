@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 """
-Meta Muse Gadget SDK RPC Executor for Raspberry Pi 3B.
-
-Architecture:
-[User] -> "Print my morning brief"
-  -> [Meta Muse Cloud Agent]
-  -> Sends RPC over Noise tunnel: `printer.briefing(payload={...})`
-  -> [Raspberry Pi 3B (muse-gadget-sdk)] `executor.py` intercepts `printer.briefing`
-  -> Merges Muse payload with local zero-AI-call Python fetchers in `generate_and_print.py`
-  -> Renders 1-page PDF & dispatches to Phomemo M834.
+Muse Gadget SDK RPC Executor for Raspberry Pi 3B.
+Supports multi-user routing (`payload.get("user", "vedant")`), saving artifacts
+into `~/Documents/digest/<user>/` and dispatching to Phomemo M834.
 """
 import argparse
 import json
@@ -20,31 +14,29 @@ from generate_and_print import print_briefing
 def handle_printer_briefing(payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     RPC handler for `printer.briefing(payload=...)`.
-    Supported payload keys from Meta Muse Cloud Agent:
-      - events / gcal_today: list of today's calendar dicts
-      - gcal_upcoming: list of next 7 days calendar dicts
-      - gmail_updates: list of {"sender": str, "subject": str}
-      - outlook_updates: list of {"sender": str, "subject": str}
-      - tasks_todo: list of str
-      - tasks_done: list of str
-      - keep_notes: list of {"title": str, "snippet": str}
-      - note / muse_note: str summary/directive from Meta Muse
-    Any omitted fields are automatically populated by local deterministic scripts (0 AI calls).
+    Supported payload keys:
+      - user: str (optional, defaults to "vedant")
+      - events / gcal_today: list of today's calendar items
+      - gcal_upcoming / gcal_next_7_days: list of next 7 days items
+      - gmail_updates / gmail: list of {"sender": str, "subject": str}
+      - outlook_updates / outlook: list of {"sender": str, "subject": str}
+      - tasks_todo / tasks_done / tasks: Google Tasks lists
+      - keep_notes / keep: list of {"title": str, "snippet": str}
+      - note / muse_note: str summary/directive
     """
     payload = payload or {}
+    user = payload.get("user") or "vedant"
     note = payload.get("note") or payload.get("muse_note") or ""
-    status = print_briefing(custom_note=note, muse_payload=payload)
+    pdf_path = print_briefing(custom_note=note, muse_payload=payload, user=user)
     return {
         "ok": True,
         "action": "printer.briefing",
-        "status": status,
+        "user": user,
+        "artifact_pdf": pdf_path,
     }
 
 
 def register_muse_handlers(gadget_server: Any) -> None:
-    """
-    Hook for muse-gadget-sdk server registration if imported by the daemon.
-    """
     if hasattr(gadget_server, "register"):
         gadget_server.register("printer.briefing", handle_printer_briefing)
     elif hasattr(gadget_server, "on"):
@@ -52,12 +44,13 @@ def register_muse_handlers(gadget_server: Any) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Lumos Meta Muse RPC Executor")
+    parser = argparse.ArgumentParser(description="Lumos RPC Executor")
+    parser.add_argument("--user", type=str, default="", help="Override user slug (default: vedant)")
     parser.add_argument(
         "--payload",
         type=str,
         default="",
-        help="JSON string or path to JSON file from Meta Muse `printer.briefing` RPC",
+        help="JSON string or path to JSON file from `printer.briefing` RPC",
     )
     args = parser.parse_args()
 
@@ -79,6 +72,9 @@ def main():
                 payload = data.get("payload", data) if isinstance(data, dict) else {}
             except Exception:
                 pass
+
+    if args.user:
+        payload["user"] = args.user
 
     res = handle_printer_briefing(payload)
     print(json.dumps(res))
