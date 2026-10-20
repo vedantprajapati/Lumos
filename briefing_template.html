@@ -219,8 +219,43 @@
   }
   .agenda-day {
     font-weight: 800;
-    width: 38%;
-    padding-right: 3px;
+    width: 25%;
+    white-space: nowrap;
+  }
+  .agenda-time {
+    width: 42%;
+    font-size: 5.1pt;
+    font-weight: 700;
+    color: #222;
+    white-space: nowrap;
+    padding-right: 2px;
+  }
+  .agenda-title {
+    width: 33%;
+    font-weight: 800;
+    text-align: right;
+  }
+  .work-hour-cell {
+    font-weight: 800 !important;
+    background: #f2f2f2;
+  }
+  .work-slot-cell {
+    border-left: 2px solid #000 !important;
+    background: #fafafa;
+  }
+  .focus-strip {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 5pt;
+    color: #555;
+    font-style: italic;
+    padding: 1px 0;
+  }
+  .event-card.event-work {
+    background: #f7f7f7;
+    border-left: 2.5px solid #000;
+  }
+  .event-card + .event-card {
+    margin-top: 1.5px;
   }
 
   /* Garmin Monthly Gym Ledger Box */
@@ -615,16 +650,22 @@
         <tbody>
           {% for slot in timeline %}
           <tr>
-            <td class="timeline-hour">{{ slot.label }}</td>
-            <td class="timeline-slot">
+            <td class="timeline-hour {% if slot.is_work_hour %}work-hour-cell{% endif %}">{{ slot.label }}</td>
+            <td class="timeline-slot {% if slot.is_work_hour %}work-slot-cell{% endif %}">
               {% for ev in slot.events %}
-              <div class="event-card">
+              {% if ev.is_focus %}
+              <div class="focus-strip">Focus & Execution</div>
+              {% else %}
+              <div class="event-card {% if ev.is_work %}event-work{% endif %}">
+                {% if ev.time %}
                 <div class="event-time">{{ ev.time }}</div>
+                {% endif %}
                 <div class="event-title">{{ ev.title }}</div>
                 {% if ev.location %}
                 <div class="event-loc">@ {{ ev.location }}</div>
                 {% endif %}
               </div>
+              {% endif %}
               {% endfor %}
             </td>
           </tr>
@@ -640,11 +681,12 @@
         <tbody>
           {% for ev in gcal_upcoming %}
           <tr>
-            <td class="agenda-day">{{ ev.day }}{% if ev.time %} • {{ ev.time }}{% endif %}</td>
-            <td>{{ ev.title }}</td>
+            <td class="agenda-day">{{ ev.day }}</td>
+            <td class="agenda-time">{{ ev.time }}</td>
+            <td class="agenda-title">{{ ev.title }}</td>
           </tr>
           {% else %}
-          <tr><td colspan="2">No upcoming 7-day events scheduled.</td></tr>
+          <tr><td colspan="3">No upcoming 7-day events scheduled.</td></tr>
           {% endfor %}
         </tbody>
       </table>

@@ -4,25 +4,15 @@ Deterministic Google Workspace & Calendar fetcher with Ontario Statutory Holiday
 Zero AI API calls. Zero fake mock data.
 """
 from datetime import date, datetime, timedelta, timezone
+import re
 from typing import Any, Dict, List, Optional, Tuple
 from lumos.config import resolve_user
-from lumos.fetchers.normalizer import normalize_gcal_today
+from lumos.fetchers.normalizer import format_time_clean, normalize_gcal_today
 
 
 def is_ontario_stat_holiday(d: date) -> Tuple[bool, str]:
     """
     Checks if a given date is an official Ontario (Canada) statutory holiday.
-    Includes:
-      - New Year's Day (Jan 1)
-      - Family Day (3rd Monday in Feb)
-      - Good Friday (Friday before Easter)
-      - Victoria Day (Monday preceding May 25)
-      - Canada Day (July 1, or July 2 if Sunday)
-      - Civic Holiday (1st Monday in August - commonly observed)
-      - Labour Day (1st Monday in September)
-      - Thanksgiving Day (2nd Monday in October)
-      - Christmas Day (Dec 25)
-      - Boxing Day (Dec 26)
     """
     year = d.year
 
@@ -38,7 +28,7 @@ def is_ontario_stat_holiday(d: date) -> Tuple[bool, str]:
     if d == mon1 + timedelta(days=14):
         return True, "Family Day"
 
-    # 3. Good Friday: Easter Sunday - 2 days (Meeus/Jones/Butcher Gregorian algorithm)
+    # 3. Good Friday: Easter Sunday - 2 days
     a = year % 19
     b = year // 100
     c = year % 100
@@ -100,19 +90,20 @@ def is_ontario_stat_holiday(d: date) -> Tuple[bool, str]:
 
 def get_default_work_event(d: date) -> Optional[Dict[str, Any]]:
     """
-    Monday through Friday (unless it's an Ontario stat holiday),
-    scheduled 9:00 AM - 6:00 PM as Work.
+    Monday through Friday (unless an Ontario stat holiday),
+    scheduled 9:00 AM – 6:00 PM as Work.
     """
-    is_holiday, holiday_name = is_ontario_stat_holiday(d)
+    is_holiday, _ = is_ontario_stat_holiday(d)
     if is_holiday:
         return None
     if d.weekday() < 5:  # Monday = 0, Friday = 4
         return {
-            "time": "09:00 AM - 06:00 PM",
+            "time": "9:00 AM – 6:00 PM",
             "title": "Work",
             "location": "East Gwillimbury",
             "hour": 9,
             "all_day": False,
+            "is_work": True,
         }
     return None
 
@@ -131,12 +122,11 @@ def _get_google_creds(user: Optional[str] = None):
 def fetch_gcal_events(user: Optional[str] = None, target_date: Optional[date] = None) -> Dict[str, Any]:
     """
     Fetches real Google Calendar events.
-    Applies Monday - Friday 9-6 Work schedule (unless stat holiday).
-    Zero mock/fake data.
+    Enforces Monday - Friday 9:00 AM - 6:00 PM Work schedule (unless stat holiday).
+    Zero fake mock data.
     """
     d = target_date or datetime.now().date()
     is_holiday, holiday_name = is_ontario_stat_holiday(d)
-    work_ev = get_default_work_event(d)
 
     today_events: List[Dict[str, Any]] = []
     upcoming_7d: List[Dict[str, str]] = []
@@ -149,8 +139,6 @@ def fetch_gcal_events(user: Optional[str] = None, target_date: Optional[date] = 
             "hour": 8,
             "all_day": True,
         })
-    elif work_ev:
-        today_events.append(work_ev)
 
     creds = _get_google_creds(user)
     if creds:
@@ -183,7 +171,7 @@ def fetch_gcal_events(user: Optional[str] = None, target_date: Optional[date] = 
                     s_dt = datetime.fromisoformat(start_raw).astimezone()
                     e_dt = datetime.fromisoformat(end_raw).astimezone()
                     ev_date = s_dt.date()
-                    time_range = f"{s_dt.strftime('%I:%M %p').lstrip('0')} - {e_dt.strftime('%I:%M %p').lstrip('0')}"
+                    time_range = f"{s_dt.strftime('%I:%M %p').lstrip('0')} – {e_dt.strftime('%I:%M %p').lstrip('0')}"
                     short_time = s_dt.strftime("%I:%M %p").lstrip("0")
                     hour = s_dt.hour
                     is_all_day = False
@@ -196,7 +184,7 @@ def fetch_gcal_events(user: Optional[str] = None, target_date: Optional[date] = 
 
                 if ev_date == d:
                     today_events.append({
-                        "time": time_range,
+                        "time": format_time_clean(time_range),
                         "title": summary,
                         "location": location,
                         "hour": hour,
@@ -205,7 +193,7 @@ def fetch_gcal_events(user: Optional[str] = None, target_date: Optional[date] = 
                 else:
                     upcoming_7d.append({
                         "day": ev_date.strftime("%a %m/%d"),
-                        "time": short_time,
+                        "time": format_time_clean(short_time),
                         "title": summary,
                     })
         except Exception:
@@ -220,11 +208,11 @@ def fetch_gcal_events(user: Optional[str] = None, target_date: Optional[date] = 
             if is_hol:
                 upcoming_7d.append({"day": day_str, "time": "All Day", "title": f"Stat Holiday: {hol_name}"})
             elif next_d.weekday() < 5:
-                upcoming_7d.append({"day": day_str, "time": "09:00 AM - 06:00 PM", "title": "Work"})
+                upcoming_7d.append({"day": day_str, "time": "9:00 AM – 6:00 PM", "title": "Work"})
             else:
                 upcoming_7d.append({"day": day_str, "time": "All Day", "title": "Rest & Personal"})
 
-    all_day, timeline = normalize_gcal_today(today_events)
+    all_day, timeline = normalize_gcal_today(today_events, target_date=d)
     return {
         "today_events": today_events,
         "all_day": all_day,

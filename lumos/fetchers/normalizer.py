@@ -2,12 +2,29 @@
 """
 Pluggable adapter & schema normalizer for Muse RPC tool-call outputs.
 Integrates Ontario statutory holidays and Monday - Friday 9-6 Work schedule.
+Supports multiple events per timeblock and formats all times cleanly.
 Zero fake mock data.
 """
 from datetime import date, datetime, timedelta
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 TIMELINE_HOURS = list(range(7, 22))  # 7 AM to 9 PM (21:00)
+
+
+def format_time_clean(time_str: str) -> str:
+    """
+    Cleans up time strings:
+    - Normalizes hyphens to en-dashes (' - ' -> ' – ')
+    - Removes unnecessary leading zeros: '09:00 AM' -> '9:00 AM', '06:00 PM' -> '6:00 PM'
+    """
+    if not time_str:
+        return ""
+    t = str(time_str).strip()
+    t = t.replace(" - ", " – ").replace("-", " – ")
+    t = re.sub(r"\b0(\d):", r"\1:", t)
+    t = re.sub(r"\b0(\d)\s*(AM|PM|am|pm)", r"\1 \2", t)
+    return t
 
 
 def _parse_hour(time_str: str) -> Tuple[int, bool]:
@@ -40,13 +57,14 @@ def normalize_gcal_today(
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
     Normalizes today's events into hourly slots (7 AM - 9 PM) and all-day banners.
-    Always enforces Monday - Friday 9:00 AM - 6:00 PM Work schedule unless an Ontario stat holiday.
+    Always enforces Monday - Friday 9:00 AM – 6:00 PM Work schedule unless an Ontario stat holiday.
+    Supports multiple events in any given timeblock.
     """
-    from lumos.fetchers.google import get_default_work_event, is_ontario_stat_holiday
+    from lumos.fetchers.google import is_ontario_stat_holiday
 
     d = target_date or datetime.now().date()
     is_holiday, holiday_name = is_ontario_stat_holiday(d)
-    work_ev = get_default_work_event(d)
+    is_work_day = (d.weekday() < 5) and (not is_holiday)
 
     slots: Dict[int, List[Dict[str, Any]]] = {h: [] for h in TIMELINE_HOURS}
     all_day: List[Dict[str, Any]] = []
@@ -60,12 +78,20 @@ def normalize_gcal_today(
             "hour": 8,
             "all_day": True,
         })
+    elif is_work_day:
+        all_day.append({
+            "time": "9:00 AM – 6:00 PM",
+            "title": "Work Day Shift",
+            "location": "East Gwillimbury",
+            "hour": 9,
+            "all_day": True,
+            "is_work": True,
+        })
 
-    # 2. Process any external/calendar events
-    has_work = False
+    # 2. Process incoming external/calendar events
     for item in raw_events or []:
         if isinstance(item, str):
-            parts = item.split(":", 1) if ":" in item else ["09:00 AM", item]
+            parts = item.split(":", 1) if ":" in item else ["9:00 AM", item]
             t_str = parts[0].strip()
             title = parts[1].strip() if len(parts) > 1 else item
             loc = ""
@@ -75,7 +101,7 @@ def normalize_gcal_today(
                 item.get("time")
                 or item.get("start_time")
                 or item.get("start")
-                or "09:00 AM"
+                or "9:00 AM"
             )
             if isinstance(t_str, dict):
                 t_str = t_str.get("dateTime") or t_str.get("date") or "All Day"
@@ -94,35 +120,70 @@ def normalize_gcal_today(
         else:
             continue
 
-        if "work" in str(title).lower():
-            has_work = True
-
+        clean_time = format_time_clean(str(t_str))
         ev_obj = {
-            "time": str(t_str),
+            "time": clean_time,
             "title": str(title)[:38],
             "location": str(loc)[:28],
             "hour": hour,
             "all_day": is_all_day,
+            "is_work": False,
         }
         if is_all_day:
             all_day.append(ev_obj)
         else:
             clamped = max(7, min(21, int(hour)))
+            # Append cleanly to support multiple events in the same timeblock
             slots[clamped].append(ev_obj)
 
-    # 3. Monday - Friday 9:00 AM - 6:00 PM Work block injection (unless stat holiday)
-    if work_ev and not has_work:
-        slots[9].insert(0, work_ev)
+    # 3. Monday - Friday 9:00 AM – 6:00 PM Work schedule enforcement
+    if is_work_day:
+        # At 9 AM (shift start)
+        has_9am = any(not ev.get("is_work") for ev in slots[9])
+        if not has_9am:
+            slots[9].insert(0, {
+                "time": "9:00 AM",
+                "title": "Work Shift Begins",
+                "location": "East Gwillimbury",
+                "hour": 9,
+                "all_day": False,
+                "is_work": True,
+            })
+
+        # At 6 PM (shift end)
+        has_6pm = any(not ev.get("is_work") for ev in slots[18])
+        if not has_6pm:
+            slots[18].append({
+                "time": "6:00 PM",
+                "title": "Work Day Concludes",
+                "location": "",
+                "hour": 18,
+                "all_day": False,
+                "is_work": True,
+            })
+
+        # For hours 10 AM to 5 PM: if an hour has NO specific meetings, mark Focus & Deep Work
+        for h in range(10, 18):
+            if len(slots[h]) == 0:
+                slots[h].append({
+                    "time": "",
+                    "title": "Focus & Execution",
+                    "location": "",
+                    "hour": h,
+                    "all_day": False,
+                    "is_focus": True,
+                })
 
     timeline = []
     for h in TIMELINE_HOURS:
         suffix = "AM" if h < 12 else "PM"
         h12 = h if h <= 12 else h - 12
+        is_work_hour = (9 <= h <= 18) and is_work_day
         timeline.append({
             "hour": h,
             "label": f"{h12} {suffix}",
             "events": slots[h],
-            "is_work_hour": (9 <= h <= 17) and bool(work_ev),
+            "is_work_hour": is_work_hour,
         })
     return all_day, timeline
 
@@ -133,7 +194,7 @@ def normalize_gcal_upcoming(
 ) -> List[Dict[str, str]]:
     """
     Normalizes upcoming 7-day events. If no external events are queued,
-    builds the real week horizon (Work 9-6 on weekdays, Rest on weekends/holidays).
+    builds the real week horizon (Work 9:00 AM – 6:00 PM on weekdays, Rest on weekends/holidays).
     """
     from lumos.fetchers.google import is_ontario_stat_holiday
 
@@ -149,7 +210,7 @@ def normalize_gcal_upcoming(
             day = item.get("day") or item.get("date") or ""
             time = item.get("time") or item.get("start") or ""
             title = item.get("title") or item.get("summary") or "Upcoming Event"
-            out.append({"day": str(day)[:12], "time": str(time)[:10], "title": str(title)[:40]})
+            out.append({"day": str(day)[:12], "time": format_time_clean(str(time))[:18], "title": str(title)[:40]})
 
     if not out:
         for offset in range(1, 8):
@@ -159,7 +220,7 @@ def normalize_gcal_upcoming(
             if is_hol:
                 out.append({"day": day_str, "time": "All Day", "title": f"Stat Holiday: {hol_name}"})
             elif next_d.weekday() < 5:
-                out.append({"day": day_str, "time": "09:00 AM - 06:00 PM", "title": "Work"})
+                out.append({"day": day_str, "time": "9:00 AM – 6:00 PM", "title": "Work"})
             else:
                 out.append({"day": day_str, "time": "All Day", "title": "Rest & Personal"})
 
