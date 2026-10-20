@@ -30,7 +30,7 @@
 - **Zero Blank Paper Waste**: Calibrated for continuous thermal rolls (`height: auto; max-height: 10.5in;`) — automatically cuts cleanly under the Year-in-Review grid without feeding unnecessary blank paper.
 - **Bidirectional Meta Muse Integration**: Triggerable via voice (*"Print my morning brief"*) from anywhere in the world over an encrypted **Noise tunnel**. Returns both a markdown executive summary and **uploads the actual PDF document** directly into your phone's Muse chat.
 - **Zero-AI Deterministic Pipelines**: Pulls live data with 0 LLM API token overhead using native Python fetchers:
-  - **Dual-Location Weather**: Live Open-Meteo conditions for **East Gwillimbury** and **Downtown Toronto** + an embedded SVG 24-hour temperature and precipitation curve.
+  - **Dual-Location Weather**: Live Open-Meteo conditions for Locations + an embedded SVG 24-hour temperature and precipitation curve.
   - **Garmin Athletic Ledger**: Headless Garmin Connect synchronization with cached OAuth sessions, 31-day attendance calendar (`■ = Gym Session`), resting heart rate, and step vitals.
   - **MinMax Workout Split**: Automatically reads your workout routine from `minmax_tracker.json` whenever a workout is scheduled on your calendar or tasks.
   - **Ontario Statutory Holiday & Work Scheduler**: Automatically schedules your 9:00 AM – 6:00 PM work block Monday through Friday while observing all 10 Ontario statutory holidays.
@@ -72,7 +72,7 @@
 
 | Column | Section | Description |
 | :--- | :--- | :--- |
-| **Header** | **Grand Masthead** | Broadsheet banner, volume / issue numbers, dual-location ears (East Gwillimbury & Toronto), Latin motto, and daily date badge. |
+| **Header** | **Grand Masthead** | Broadsheet banner, volume / issue numbers, dual-location ears, Latin motto, and daily date badge. |
 | **Col 1** | **The Hourly Docket** | 7:00 AM – 9:00 PM timeline mapping focus blocks, scheduled events, and work hours. |
 | **Col 1** | **Seven-Day Horizon** | Rolling 7-day forecast of upcoming meetings, appointments, and statutory holidays. |
 | **Col 1** | **Athletic Ledger** | Garmin Connect monthly gym attendance grid, recovery vitals (RHR, Steps, Sleep), and targeted MinMax workout split. |
