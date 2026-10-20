@@ -13,6 +13,7 @@ from lumos.renderer import (
     build_briefing_context,
     compute_year_progress,
     format_ordinal_date,
+    generate_daily_digest_pdf,
     generate_pdf,
     print_briefing,
     render_html,
