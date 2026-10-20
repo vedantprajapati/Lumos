@@ -1,0 +1,29 @@
+# Environment & Secrets
+.env
+token.json
+credentials.json
+.garth/
+garmin_tokens/
+.muse_cache.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Generated Output
+*.pdf
+output/
+preview.html
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

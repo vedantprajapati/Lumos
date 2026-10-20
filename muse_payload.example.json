@@ -1,0 +1,63 @@
+{
+  "gcal_today": [
+    {
+      "time": "09:00 AM - 09:30 AM",
+      "title": "Platform Standup & Accelerator Sync",
+      "location": "Google Meet"
+    },
+    {
+      "time": "11:00 AM - 12:30 PM",
+      "title": "Deep Work: Lumos Thermal Pipeline",
+      "location": "Focus Block"
+    },
+    {
+      "time": "05:30 PM - 06:45 PM",
+      "title": "Gym — Strength & Conditioning",
+      "location": "East Gwillimbury"
+    }
+  ],
+  "gcal_next_7_days": [
+    {
+      "day": "Tue Oct 20",
+      "time": "10:00 AM",
+      "title": "Architecture Review"
+    },
+    {
+      "day": "Thu Oct 22",
+      "time": "02:00 PM",
+      "title": "Sprint Demo & Telemetry Sync"
+    }
+  ],
+  "gmail_updates": [
+    {
+      "sender": "GitHub",
+      "subject": "[vedantprajapati/Lumos] Main branch checks passed"
+    },
+    {
+      "sender": "Garmin Connect",
+      "subject": "Weekly fitness & recovery summary ready"
+    }
+  ],
+  "outlook_updates": [
+    {
+      "sender": "Engineering Lead",
+      "subject": "Q4 Roadmap & Infrastructure Milestones"
+    }
+  ],
+  "tasks_todo": [
+    "Verify Phomemo M834 1-page print alignment",
+    "Review open pull requests before midday",
+    "Hit 4x gym sessions this week"
+  ],
+  "tasks_done": [
+    "Configure Raspberry Pi GPIO 17 button daemon",
+    "Wire dual East Gwillimbury + Downtown Toronto weather"
+  ],
+  "keep_notes": [
+    {
+      "title": "PINNED REMINDER",
+      "snippet": "Pack gym bag before heading downtown; check GO train schedule."
+    }
+  ],
+  "note": "Synced via Muse connectors (Gmail, Outlook, GCal, Tasks, Keep) + local Garmin & Open-Meteo scripts."
+}
