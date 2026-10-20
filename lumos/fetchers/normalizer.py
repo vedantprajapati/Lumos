@@ -80,15 +80,6 @@ def normalize_gcal_today(
             "hour": 8,
             "all_day": True,
         })
-    elif is_work_day:
-        all_day.append({
-            "time": "9:00 AM – 6:00 PM",
-            "title": "Work Day Shift",
-            "location": work_loc,
-            "hour": 9,
-            "all_day": True,
-            "is_work": True,
-        })
 
     # 2. Process incoming external/calendar events
     for item in raw_events or []:
