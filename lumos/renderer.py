@@ -2,13 +2,14 @@
 """
 Core digest context builder, PDF renderer, and CUPS print dispatcher.
 """
-from datetime import datetime
+import calendar
+from datetime import date, datetime
 import json
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from jinja2 import Template
 
 from lumos.config import (
@@ -33,6 +34,15 @@ from lumos.fetchers.normalizer import (
 )
 from lumos.fetchers.weather import fetch_weather
 
+MONTH_LABELS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+SPECIAL_DAYS = {
+    (1, 1): "★",
+    (2, 14): "♥",
+    (7, 1): "♣",
+    (10, 31): "♦",
+    (12, 25): "✦",
+}
+
 
 def format_ordinal_date(dt: datetime) -> str:
     day = dt.day
@@ -44,13 +54,56 @@ def format_ordinal_date(dt: datetime) -> str:
 
 
 def compute_year_progress(dt: datetime) -> Dict[str, Any]:
+    """
+    Computes the 12-month visual calendar grid for `Year Progress`
+    (matching the receipt-brief photo: JAN-DEC 2-column grid where elapsed days
+    are filled black squares and future days are open bordered squares).
+    """
+    today_d = dt.date()
+    year = today_d.year
     day_of_year = dt.timetuple().tm_yday
-    total_days = 366 if (dt.year % 4 == 0 and (dt.year % 100 != 0 or dt.year % 400 == 0)) else 365
-    pct = round((day_of_year / total_days) * 100)
+    total_days = 366 if calendar.isleap(year) else 365
+    pct_float = (day_of_year / total_days) * 100.0
+
+    cal = calendar.Calendar(firstweekday=6)  # Sunday-first
+    months: List[Dict[str, Any]] = []
+
+    for m_idx in range(1, 13):
+        weeks_raw = cal.monthdayscalendar(year, m_idx)
+        weeks = []
+        for w in weeks_raw:
+            row = []
+            for d in w:
+                if d == 0:
+                    row.append({"day": None, "state": "pad", "icon": ""})
+                else:
+                    cell_date = date(year, m_idx, d)
+                    icon = SPECIAL_DAYS.get((m_idx, d), "")
+                    if cell_date < today_d:
+                        state = "past"
+                    elif cell_date == today_d:
+                        state = "today"
+                    else:
+                        state = "future"
+                    row.append({"day": d, "state": state, "icon": icon})
+            weeks.append(row)
+        months.append({
+            "label": MONTH_LABELS[m_idx - 1],
+            "month": m_idx,
+            "weeks": weeks,
+        })
+
+    # Pair into 6 rows of 2 months ([JAN, FEB], [MAR, APR], ..., [NOV, DEC])
+    month_pairs = [months[i : i + 2] for i in range(0, 12, 2)]
+
     return {
+        "year": year,
         "day_of_year": day_of_year,
         "total_days": total_days,
-        "percent": pct,
+        "percent": round(pct_float),
+        "percent_exact": f"{pct_float:.1f}%",
+        "months": months,
+        "month_pairs": month_pairs,
     }
 
 
@@ -88,7 +141,7 @@ def build_briefing_context(
     payload = _load_or_save_daily_payload(u_cfg.slug, muse_payload, today_dt)
     ordinal_date = format_ordinal_date(today_dt)
 
-    # 1. Dual-Location Weather (East Gwillimbury + Downtown Toronto)
+    # 1. Dual-Location Weather (East Gwillimbury + Downtown Toronto) + 24h Curve
     weather = payload.get("weather") or fetch_weather()
 
     # 2. Google Calendar: Today (Hourly Timeline 7 AM - 9 PM) + Next 7 Days
@@ -134,7 +187,7 @@ def build_briefing_context(
     # 6. Garmin Monthly Gym & Biometrics
     garmin = payload.get("garmin") or fetch_garmin_stats(user=u_cfg.slug)
 
-    # 7. Year Progress & Dispatch Note
+    # 7. Year Progress (12-Month Visual Grid) & Dispatch Note
     year_progress = compute_year_progress(today_dt)
     note = (
         custom_note

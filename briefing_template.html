@@ -5,9 +5,8 @@
 <title>{{ header_title }}</title>
 <style>
   @page {
-    /* Consistent 8.5in Letter width; max 11in height for 1-page cap on roll or cut-sheet */
     size: 8.5in 11in;
-    margin: 0.22in 0.32in;
+    margin: 0.18in 0.28in 0.22in 0.28in;
   }
   * {
     box-sizing: border-box;
@@ -15,10 +14,10 @@
     print-color-adjust: exact;
   }
   html, body {
-    width: 7.86in;
-    max-width: 7.86in;
+    width: 7.94in;
+    max-width: 7.94in;
     height: auto;
-    max-height: 10.5in;
+    max-height: 10.6in;
     overflow: hidden;
     font-family: 'Georgia', 'Times New Roman', serif;
     color: #111;
@@ -29,44 +28,75 @@
     page-break-after: avoid;
     page-break-inside: avoid;
   }
-  .page-frame {
+
+  /* Authentic Broadsheet Newspaper Top Banner */
+  .newspaper-ears {
     display: flex;
-    flex-direction: column;
-    /* Hug content height naturally for continuous 8.5in thermal roll — no wasted blank feed */
-    height: auto;
-    max-height: 10.5in;
-    overflow: hidden;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid #000;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 5.6pt;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding-bottom: 2px;
+    font-weight: 800;
   }
+  .newspaper-ears span {
+    display: inline-block;
+  }
+
+  /* The Grand Broadsheet Masthead */
   .masthead-wrap {
     text-align: center;
-    padding: 2px 0 3px 0;
-    border-bottom: 3px double #000;
-    margin-bottom: 6px;
+    padding: 3px 0 2px 0;
+  }
+  .motto {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 6.8pt;
+    letter-spacing: 0.2px;
+    margin-bottom: 1px;
+    color: #222;
   }
   .masthead {
     font-family: 'Times New Roman', 'Playfair Display', serif;
-    font-size: 21pt;
+    font-size: 28pt;
     font-weight: 900;
-    letter-spacing: -0.3px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     margin: 0;
-    line-height: 1.05;
+    line-height: 0.95;
   }
-  .meta-strip {
-    border-top: 1px solid #000;
-    padding-top: 2px;
+  .masthead-sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 6.8pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 2px;
+  }
+
+  /* Double-Rule Meta Strip / Dateline */
+  .meta-dateline {
+    border-top: 2px solid #000;
+    border-bottom: 3px double #000;
+    padding: 2.5px 2px;
     margin-top: 3px;
+    margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 6.3pt;
+    font-size: 6.2pt;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
   }
+
+  /* Broadsheet 3-Column Grid */
   .columns {
     display: flex;
-    gap: 0.18in;
+    gap: 0.16in;
     align-items: stretch;
     overflow: hidden;
   }
@@ -78,64 +108,87 @@
     overflow: hidden;
   }
   .col-border {
-    border-right: 1px solid #111;
-    padding-right: 0.18in;
-  }
-  .section-tag {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 6.4pt;
-    font-weight: 900;
-    letter-spacing: 0.9px;
-    text-transform: uppercase;
-    border-bottom: 1.5px solid #000;
-    padding-bottom: 1.5px;
-    margin-bottom: 3.5px;
-    margin-top: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-  .section-tag:first-child {
-    margin-top: 0;
+    border-right: 1.2px solid #000;
+    padding-right: 0.16in;
   }
 
-  /* Hourly Timeline (Column 1) */
+  /* Authentic Newspaper Section Tags & Headlines */
+  .section-banner {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 5.6pt;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-top: 1.5px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 1.5px 0;
+    margin-bottom: 3px;
+    margin-top: 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-banner:first-child {
+    border-top: none;
+    margin-top: 0;
+  }
+  h1.headline {
+    font-family: 'Times New Roman', serif;
+    font-size: 11pt;
+    font-weight: 900;
+    line-height: 1.05;
+    text-transform: uppercase;
+    margin: 0 0 2px 0;
+    letter-spacing: -0.2px;
+  }
+  h2.subhead {
+    font-family: 'Times New Roman', serif;
+    font-size: 7.2pt;
+    font-style: italic;
+    margin: 0 0 4px 0;
+    font-weight: normal;
+    color: #333;
+    line-height: 1.15;
+  }
+
+  /* COLUMN 1: The Hourly Docket Timeline */
   .all-day-banner {
     border: 1.2px solid #000;
     padding: 2px 4px;
     margin-bottom: 3px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 6.2pt;
+    font-size: 6pt;
+    background: #fbfbfb;
   }
-  .timeline-wrap {
+  .timeline-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 4px;
   }
-  .timeline-row td {
+  .timeline-table td {
     padding: 0;
     vertical-align: top;
   }
   .timeline-hour {
-    width: 32px;
+    width: 28px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.5pt;
-    font-weight: 700;
+    font-size: 5.2pt;
+    font-weight: 800;
     color: #222;
     text-align: right;
-    padding-right: 4px !important;
-    padding-top: 1.5px !important;
-    border-right: 1px solid #000;
-    height: 14.5px;
+    padding-right: 3.5px !important;
+    padding-top: 1px !important;
+    border-right: 1.2px solid #000;
+    height: 12.5px;
     white-space: nowrap;
   }
   .timeline-slot {
-    padding-left: 4px !important;
-    padding-bottom: 1.5px !important;
-    border-bottom: 1px dotted #bbb;
-    height: 14.5px;
+    padding-left: 3.5px !important;
+    padding-bottom: 1px !important;
+    border-bottom: 1px dotted #ccc;
+    height: 12.5px;
   }
-  .event-block {
+  .event-card {
     border: 1px solid #000;
     padding: 1.5px 3.5px;
     margin: 0.5px 0;
@@ -143,43 +196,106 @@
     font-family: 'Helvetica Neue', Arial, sans-serif;
   }
   .event-time {
-    font-size: 5.4pt;
+    font-size: 5.2pt;
     font-weight: 800;
     text-transform: uppercase;
   }
   .event-title {
-    font-size: 6.4pt;
+    font-size: 6.2pt;
     font-weight: 900;
-    line-height: 1.08;
+    line-height: 1.05;
   }
   .event-loc {
-    font-size: 5.4pt;
+    font-size: 5.2pt;
     color: #333;
   }
 
-  /* 7-Day Upcoming Table */
+  /* 7-Day Horizon Table */
   .agenda-table {
     width: 100%;
     border-collapse: collapse;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 6.3pt;
-    margin-bottom: 2px;
+    font-size: 6pt;
+    margin-bottom: 3px;
   }
   .agenda-table td {
-    padding: 1.8px 0;
+    padding: 1.5px 0;
     border-bottom: 1px dotted #777;
     vertical-align: top;
   }
   .agenda-day {
     font-weight: 800;
     width: 38%;
-    padding-right: 4px;
+    padding-right: 3px;
   }
 
-  /* Column 2: Emails, Tasks, Keep */
-  .sub-label {
+  /* Garmin Monthly Gym Ledger Box */
+  .framed-box {
+    border: 1.2px solid #000;
+    padding: 3.5px 4px;
+    margin-bottom: 3px;
+  }
+  .box-header {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.8pt;
+    font-size: 5.6pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 1.5px;
+    margin-bottom: 2.5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .cal-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin-bottom: 2.5px;
+  }
+  .cal-grid th {
+    font-size: 4.8pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-align: center;
+    padding-bottom: 1px;
+  }
+  .cal-cell {
+    width: 14.28%;
+    height: 12px;
+    border: 1px solid #000;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 5.4pt;
+    font-weight: 700;
+  }
+  .cal-cell.empty {
+    border: 1px dotted #ccc;
+    background: #fff;
+  }
+  .cal-cell.gym-hit {
+    background: #000 !important;
+    color: #fff !important;
+    font-weight: 900;
+  }
+  .cal-cell.today-ring {
+    outline: 1.8px solid #000;
+    outline-offset: -2px;
+    font-weight: 900;
+  }
+  .meta-stats {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 5.6pt;
+    border-top: 1px dotted #555;
+    padding-top: 2px;
+    margin-top: 2px;
+    line-height: 1.15;
+  }
+
+  /* COLUMN 2: Telegraph & Inbox Ledger */
+  .category-pill {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 5.4pt;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -193,24 +309,24 @@
     list-style: none;
     padding: 0;
     margin: 0 0 4px 0;
-    font-size: 6.7pt;
+    font-size: 6.4pt;
   }
   .mail-list li {
     border-bottom: 1px dotted #888;
-    padding: 1.8px 0;
+    padding: 1.5px 0;
     line-height: 1.12;
   }
   .mail-sender {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-weight: 800;
-    font-size: 6pt;
+    font-size: 5.8pt;
     text-transform: uppercase;
   }
   ul.check-list {
     list-style: none;
     padding-left: 0;
-    margin: 0 0 4px 0;
-    font-size: 6.7pt;
+    margin: 0 0 3px 0;
+    font-size: 6.4pt;
     font-family: 'Helvetica Neue', Arial, sans-serif;
   }
   ul.check-list li {
@@ -223,175 +339,230 @@
     content: "□";
     position: absolute;
     left: 0;
-    font-size: 7.2pt;
+    font-size: 7pt;
     line-height: 1;
     font-weight: bold;
   }
   ul.check-list li.done {
-    color: #333;
+    color: #444;
     text-decoration: line-through;
   }
   ul.check-list li.done::before {
     content: "■";
     position: absolute;
     left: 0;
-    font-size: 6.8pt;
+    font-size: 6.5pt;
     line-height: 1;
   }
-  .callout-card {
-    border: 1px solid #000;
-    padding: 3.5px 4.5px;
-    margin-bottom: 4px;
+  .callout-bulletin {
+    border: 1.2px solid #000;
+    padding: 3px 4px;
+    margin-bottom: 3.5px;
   }
   .pill-tag {
     display: inline-block;
     border: 1px solid #000;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.4pt;
+    font-size: 5pt;
     font-weight: 900;
     text-transform: uppercase;
     padding: 0.5px 3px;
-    margin-bottom: 1.5px;
+    margin-bottom: 1px;
     letter-spacing: 0.4px;
   }
   .card-body {
-    font-size: 6.7pt;
+    font-size: 6.4pt;
     line-height: 1.12;
     margin: 0;
   }
-
-  /* Column 3: Garmin Monthly Calendar Grid + Year Progress + Dual Weather */
-  .framed-box {
-    border: 1.2px solid #000;
-    padding: 4.5px;
-    margin-bottom: 4.5px;
-  }
-  .box-header {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.9pt;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    border-bottom: 1px solid #000;
-    padding-bottom: 1.5px;
-    margin-bottom: 3px;
-    display: flex;
-    justify-content: space-between;
-  }
-  .cal-grid {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    margin-bottom: 3px;
-  }
-  .cal-grid th {
-    font-size: 5.3pt;
-    font-weight: 900;
-    text-transform: uppercase;
-    text-align: center;
-    padding-bottom: 1.5px;
-  }
-  .cal-cell {
-    width: 14.28%;
-    height: 14.5px;
-    border: 1px solid #000;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 6pt;
-    font-weight: 700;
-  }
-  .cal-cell.empty {
-    border: 1px dotted #ccc;
-    background: #fff;
-  }
-  .cal-cell.gym-hit {
-    background: #000 !important;
-    color: #fff !important;
-    font-weight: 900;
-  }
-  .cal-cell.today-ring {
-    outline: 2px solid #000;
-    outline-offset: -2px;
-    font-weight: 900;
-  }
-  .progress-bar-outer {
-    width: 100%;
-    height: 6px;
-    border: 1px solid #000;
-    margin: 2px 0 3px 0;
-    padding: 1px;
-  }
-  .progress-bar-inner {
-    height: 100%;
-    background: #000;
-  }
-  .weather-dual-grid {
-    display: flex;
-    gap: 6px;
-  }
-  .weather-city-col {
-    flex: 1;
-    min-width: 0;
-  }
-  .weather-city-col:first-child {
-    border-right: 1px dotted #555;
-    padding-right: 6px;
-  }
-  .city-title {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.8pt;
-    font-weight: 900;
-    text-transform: uppercase;
-    margin-bottom: 1px;
-  }
-  .temp-large {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 15pt;
-    font-weight: 900;
-    line-height: 0.95;
-  }
-  .city-meta {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.6pt;
-    line-height: 1.2;
-    margin-top: 2px;
-  }
-  .meta-stats {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.9pt;
-    border-top: 1px dotted #555;
-    padding-top: 2.5px;
-    margin-top: 2.5px;
-    line-height: 1.2;
-  }
   .pull-quote {
-    border-top: 1.2px solid #000;
-    border-bottom: 1.2px solid #000;
-    padding: 3.5px 3px;
+    border-top: 1.5px solid #000;
+    border-bottom: 1.5px solid #000;
+    padding: 3px 4px;
     text-align: center;
     font-family: 'Georgia', serif;
     font-style: italic;
-    font-size: 7pt;
-    margin: 3.5px 0;
+    font-size: 6.8pt;
+    margin: 3px 0;
     line-height: 1.12;
   }
   .quote-author {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.5pt;
+    font-size: 5.2pt;
     font-weight: 800;
     text-transform: uppercase;
     font-style: normal;
     display: block;
-    margin-top: 1.5px;
+    margin-top: 1px;
+    letter-spacing: 0.8px;
   }
+
+  /* COLUMN 3: Weather Bureau & 12-Month Year Progress */
+  .weather-box {
+    border: 1.2px solid #000;
+    padding: 3.5px 4.5px;
+    margin-bottom: 3px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .weather-city-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 1px 0;
+  }
+  .weather-city-row + .weather-city-row {
+    border-top: 1px dotted #666;
+    margin-top: 2px;
+    padding-top: 2px;
+  }
+  .w-loc-label {
+    font-size: 5.4pt;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .w-cond {
+    font-size: 7.2pt;
+    font-weight: 900;
+  }
+  .w-range {
+    font-size: 9.5pt;
+    font-weight: 900;
+  }
+  .weather-stat-strip {
+    display: flex;
+    gap: 2.5px;
+    margin-bottom: 3px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .w-stat-cell {
+    flex: 1;
+    border: 1px solid #000;
+    padding: 2px 1px;
+    text-align: center;
+  }
+  .w-stat-label {
+    font-size: 4.6pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: block;
+  }
+  .w-stat-val {
+    font-size: 6pt;
+    font-weight: 900;
+  }
+  .weather-chart-box {
+    border: 1.2px solid #000;
+    padding: 3px 4px;
+    margin-bottom: 3.5px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .chart-title {
+    font-size: 5pt;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 1.5px;
+  }
+  .chart-axis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 4.6pt;
+    font-weight: 800;
+    border-top: 1px solid #000;
+    padding-top: 1.5px;
+    margin-top: 1px;
+  }
+  .chart-legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 4.6pt;
+    font-weight: 700;
+    margin-top: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* 12-Month Year Progress Grid */
+  .yp-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin-bottom: 2.5px;
+  }
+  .yp-count {
+    font-size: 8.8pt;
+    font-weight: 900;
+  }
+  .yp-pct {
+    font-size: 6pt;
+    font-weight: 800;
+  }
+  .yp-months-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .yp-months-table > tbody > tr > td {
+    width: 50%;
+    vertical-align: top;
+    padding: 1.2px 1.5px;
+  }
+  .yp-month-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 2.5px;
+  }
+  .yp-month-name {
+    font-size: 4.8pt;
+    font-weight: 900;
+    width: 16px;
+    text-transform: uppercase;
+    padding-top: 0.5px;
+    flex-shrink: 0;
+  }
+  .yp-mini-cal {
+    border-collapse: collapse;
+  }
+  .yp-mini-cal td {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 4.2pt;
+    line-height: 1;
+  }
+  .yp-day-pad {
+    border: none;
+    background: transparent;
+  }
+  .yp-day-past {
+    border: 0.6px solid #000;
+    background: #111 !important;
+    color: #fff !important;
+  }
+  .yp-day-today {
+    border: 1.2px solid #000;
+    background: #fff !important;
+    color: #000 !important;
+    font-weight: 900;
+  }
+  .yp-day-future {
+    border: 0.6px solid #333;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Broadsheet Footer Stamp */
   .footer-stamp {
-    margin-top: 5px;
+    margin-top: 4px;
     border-top: 1.5px solid #000;
-    padding-top: 2.5px;
+    border-bottom: 3px double #000;
+    padding: 2px 0;
     display: flex;
     justify-content: space-between;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.8pt;
+    font-size: 5.6pt;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.6px;
@@ -399,222 +570,314 @@
 </style>
 </head>
 <body>
-  <div class="page-frame">
-    <div class="masthead-wrap">
-      <div class="masthead">{{ header_title }}</div>
-      <div class="meta-strip">
-        <span>{{ date_str }}</span>
-        <span>{{ location_name }}</span>
-        <span>8.5" Roll • 300 DPI</span>
+  <!-- Top Ears Banner -->
+  <div class="newspaper-ears">
+    <span>VOL. IV • NO. 102</span>
+    <span>THE DAILY INTELLIGENCE & TELEMETRY BROADSHEET</span>
+    <span>300 DPI • 8.5 IN. ROLL</span>
+  </div>
+
+  <!-- Grand Masthead -->
+  <div class="masthead-wrap">
+    <div class="motto">"All the News, Schedule, Weather & Athletic Telemetry Fit to Print on Demand"</div>
+    <div class="masthead">The Lumos Chronicle</div>
+    <div class="masthead-sub">{{ user_display }}'s Morning Dispatch & Personal Gazette</div>
+  </div>
+
+  <!-- Meta Dateline Strip -->
+  <div class="meta-dateline">
+    <span>{{ date_str }}</span>
+    <span>DAY {{ year_progress.day_of_year }} OF {{ year_progress.total_days }} ({{ year_progress.percent_exact }})</span>
+    <span>{{ location_name }}</span>
+    <span>ISSUE 102</span>
+  </div>
+
+  <!-- 3-Column Newspaper Content -->
+  <div class="columns">
+    <!-- COLUMN 1: The Hourly Docket & Seven-Day Outlook & Garmin Gym Ledger -->
+    <div class="col col-border">
+      <div class="section-banner">
+        <span>Section A • The Daily Ledger</span>
+        <span>{{ short_date }}</span>
       </div>
-    </div>
+      <h1 class="headline">Today's Docket</h1>
+      <h2 class="subhead">Scheduled syncs, focus blocks & personal commitments.</h2>
 
-    <div class="columns">
-      <!-- COLUMN 1: Visual Hourly Timeline (7 AM - 9 PM) + Next 7 Days -->
-      <div class="col col-border">
-        <div class="section-tag">
-          <span>Calendar • Today</span>
-          <span>{{ short_date }}</span>
-        </div>
-
-        {% for ev in all_day_events %}
-        <div class="all-day-banner">
-          <strong>{{ ev.title }}</strong><br>
-          <span>All Day {% if ev.location %}• @ {{ ev.location }}{% endif %}</span>
-        </div>
-        {% endfor %}
-
-        <table class="timeline-wrap">
-          <tbody>
-            {% for slot in timeline %}
-            <tr class="timeline-row">
-              <td class="timeline-hour">{{ slot.label }}</td>
-              <td class="timeline-slot">
-                {% for ev in slot.events %}
-                <div class="event-block">
-                  <div class="event-time">{{ ev.time }}</div>
-                  <div class="event-title">{{ ev.title }}</div>
-                  {% if ev.location %}
-                  <div class="event-loc">@ {{ ev.location }}</div>
-                  {% endif %}
-                </div>
-                {% endfor %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
-        <div class="section-tag">
-          <span>Next 7 Days • Horizon</span>
-          <span>GCal</span>
-        </div>
-        <table class="agenda-table">
-          <tbody>
-            {% for ev in gcal_upcoming %}
-            <tr>
-              <td class="agenda-day">{{ ev.day }}{% if ev.time %} • {{ ev.time }}{% endif %}</td>
-              <td>{{ ev.title }}</td>
-            </tr>
-            {% else %}
-            <tr><td colspan="2">No upcoming 7-day events scheduled.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      {% for ev in all_day_events %}
+      <div class="all-day-banner">
+        <strong>{{ ev.title }}</strong> • All Day {% if ev.location %}(@ {{ ev.location }}){% endif %}
       </div>
+      {% endfor %}
 
-      <!-- COLUMN 2: Gmail, Outlook, Google Tasks (To-Do & Done), Google Keep -->
-      <div class="col col-border">
-        <div class="section-tag">
-          <span>Inbox Updates</span>
-          <span>Gmail & Outlook</span>
-        </div>
-
-        <div><span class="sub-label">Gmail</span></div>
-        <ul class="mail-list">
-          {% for mail in gmail_updates %}
-          <li><span class="mail-sender">{{ mail.sender }}:</span> {{ mail.subject }}</li>
-          {% else %}
-          <li>No unread primary Gmail threads.</li>
-          {% endfor %}
-        </ul>
-
-        <div><span class="sub-label">Outlook</span></div>
-        <ul class="mail-list">
-          {% for mail in outlook_updates %}
-          <li><span class="mail-sender">{{ mail.sender }}:</span> {{ mail.subject }}</li>
-          {% else %}
-          <li>No unread Outlook threads.</li>
-          {% endfor %}
-        </ul>
-
-        <div class="section-tag">
-          <span>Google Tasks</span>
-          <span>To-Do & Done</span>
-        </div>
-        <ul class="check-list">
-          {% for task in tasks_todo %}
-          <li class="todo">{{ task }}</li>
-          {% endfor %}
-          {% for task in tasks_done %}
-          <li class="done">{{ task }}</li>
-          {% endfor %}
-        </ul>
-
-        <div class="section-tag">
-          <span>Google Keep</span>
-          <span>Pinned</span>
-        </div>
-        {% for note in keep_notes %}
-        <div class="callout-card">
-          <span class="pill-tag">{{ note.title }}</span>
-          <p class="card-body">{{ note.snippet }}</p>
-        </div>
-        {% endfor %}
-
-        <div class="pull-quote">
-          "{{ quote }}"
-          <span class="quote-author">— {{ quote_author }}</span>
-        </div>
-      </div>
-
-      <!-- COLUMN 3: Garmin Monthly Gym Calendar Grid, Year Progress, Dual Weather, System Note -->
-      <div class="col">
-        <div class="section-tag">
-          <span>Garmin Gym Tracker</span>
-          <span>{{ garmin.month_name }}</span>
-        </div>
-
-        <div class="framed-box">
-          <div class="box-header">
-            <span>Monthly Gym Grid (■ = Gym)</span>
-            <span>{{ garmin.gym_count }} Days</span>
-          </div>
-
-          <table class="cal-grid">
-            <thead>
-              <tr>
-                <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for week in garmin.month_grid %}
-              <tr>
-                {% for cell in week %}
-                {% if not cell.day %}
-                <td class="cal-cell empty"></td>
-                {% else %}
-                <td class="cal-cell {% if cell.is_gym %}gym-hit{% endif %} {% if cell.is_today %}today-ring{% endif %}">
-                  {{ cell.day }}
-                </td>
+      <table class="timeline-table">
+        <tbody>
+          {% for slot in timeline %}
+          <tr>
+            <td class="timeline-hour">{{ slot.label }}</td>
+            <td class="timeline-slot">
+              {% for ev in slot.events %}
+              <div class="event-card">
+                <div class="event-time">{{ ev.time }}</div>
+                <div class="event-title">{{ ev.title }}</div>
+                {% if ev.location %}
+                <div class="event-loc">@ {{ ev.location }}</div>
                 {% endif %}
-                {% endfor %}
-              </tr>
+              </div>
               {% endfor %}
-            </tbody>
-          </table>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
-          <div class="meta-stats">
-            <strong>Latest Workout:</strong> {{ garmin.last_gym }}<br>
-            <strong>Vitals:</strong> RHR {{ garmin.resting_hr }} bpm • Steps {{ garmin.steps_yesterday }} • Sleep {{ garmin.sleep_hours }}
-          </div>
-        </div>
+      <div class="section-banner">
+        <span>Seven-Day Horizon</span>
+        <span>Google Calendar</span>
+      </div>
+      <table class="agenda-table">
+        <tbody>
+          {% for ev in gcal_upcoming %}
+          <tr>
+            <td class="agenda-day">{{ ev.day }}{% if ev.time %} • {{ ev.time }}{% endif %}</td>
+            <td>{{ ev.title }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="2">No upcoming 7-day events scheduled.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
-        <div class="framed-box">
-          <div class="box-header">
-            <span>Year Progress</span>
-            <span>{{ year_progress.day_of_year }}/{{ year_progress.total_days }} ({{ year_progress.percent }}%)</span>
-          </div>
-          <div class="progress-bar-outer">
-            <div class="progress-bar-inner" style="width: {{ year_progress.percent }}%;"></div>
-          </div>
-          <div style="font-family:'Helvetica Neue', Arial, sans-serif; font-size:5.7pt;">
-            <strong>Solar:</strong> Sunrise {{ weather.sunrise }} • Sunset {{ weather.sunset }} ({{ weather.daylight }})
-          </div>
+      <div class="section-banner">
+        <span>Athletic Ledger</span>
+        <span>Garmin Connect</span>
+      </div>
+      <div class="framed-box">
+        <div class="box-header">
+          <span>{{ garmin.month_name }} Gym Grid (■ = Gym)</span>
+          <span>{{ garmin.gym_count }} Days</span>
         </div>
-
-        <div class="section-tag">
-          <span>Weather Desk</span>
-          <span>Home & Downtown</span>
-        </div>
-        <div class="framed-box">
-          <div class="weather-dual-grid">
-            <div class="weather-city-col">
-              <div class="city-title">{{ weather.home.name }}</div>
-              <div class="temp-large">{{ weather.home.temp }}°C</div>
-              <div class="city-meta">
-                <strong>{{ weather.home.condition }}</strong><br>
-                H: {{ weather.home.temp_max }}° • L: {{ weather.home.temp_min }}°<br>
-                Precip: {{ weather.home.precipitation }}% • {{ weather.home.wind }} km/h
-              </div>
-            </div>
-            <div class="weather-city-col">
-              <div class="city-title">{{ weather.toronto.name }}</div>
-              <div class="temp-large">{{ weather.toronto.temp }}°C</div>
-              <div class="city-meta">
-                <strong>{{ weather.toronto.condition }}</strong><br>
-                H: {{ weather.toronto.temp_max }}° • L: {{ weather.toronto.temp_min }}°<br>
-                Precip: {{ weather.toronto.precipitation }}% • {{ weather.toronto.wind }} km/h
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-tag">
-          <span>Dispatch Note</span>
-          <span>Status</span>
-        </div>
-        <div class="callout-card">
-          <span class="pill-tag">NOTES</span>
-          <p class="card-body">{{ muse_note }}</p>
+        <table class="cal-grid">
+          <thead>
+            <tr>
+              <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for week in garmin.month_grid %}
+            <tr>
+              {% for cell in week %}
+              {% if not cell.day %}
+              <td class="cal-cell empty"></td>
+              {% else %}
+              <td class="cal-cell {% if cell.is_gym %}gym-hit{% endif %} {% if cell.is_today %}today-ring{% endif %}">
+                {{ cell.day }}
+              </td>
+              {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="meta-stats">
+          <strong>Latest Workout:</strong> {{ garmin.last_gym }}<br>
+          <strong>Vitals:</strong> RHR {{ garmin.resting_hr }} bpm • Steps {{ garmin.steps_yesterday }} • Sleep {{ garmin.sleep_hours }}
         </div>
       </div>
     </div>
 
-    <div class="footer-stamp">
-      <span>REV 1 • {{ header_title }}</span>
-      <span>TEAR line ▲ • DAILY REPORT PRINT 1/1</span>
+    <!-- COLUMN 2: The Morning Telegraph & Directives -->
+    <div class="col col-border">
+      <div class="section-banner">
+        <span>Section B • Telegraph Desk</span>
+        <span>Comms</span>
+      </div>
+      <h1 class="headline">Morning Dispatches</h1>
+      <h2 class="subhead">Priority correspondence, tasks & operational directives.</h2>
+
+      <div><span class="category-pill">Gmail Priority</span></div>
+      <ul class="mail-list">
+        {% for mail in gmail_updates %}
+        <li><span class="mail-sender">{{ mail.sender }}:</span> {{ mail.subject }}</li>
+        {% else %}
+        <li>No unread primary Gmail threads.</li>
+        {% endfor %}
+      </ul>
+
+      <div><span class="category-pill">Outlook Priority</span></div>
+      <ul class="mail-list">
+        {% for mail in outlook_updates %}
+        <li><span class="mail-sender">{{ mail.sender }}:</span> {{ mail.subject }}</li>
+        {% else %}
+        <li>No unread Outlook threads.</li>
+        {% endfor %}
+      </ul>
+
+      <div class="section-banner">
+        <span>Orders of the Day</span>
+        <span>Google Tasks</span>
+      </div>
+      <ul class="check-list">
+        {% for task in tasks_todo %}
+        <li class="todo">{{ task }}</li>
+        {% endfor %}
+        {% for task in tasks_done %}
+        <li class="done">{{ task }}</li>
+        {% endfor %}
+      </ul>
+
+      <div class="section-banner">
+        <span>Field Notes & Memoranda</span>
+        <span>Google Keep</span>
+      </div>
+      {% for note in keep_notes %}
+      <div class="callout-bulletin">
+        <span class="pill-tag">{{ note.title }}</span>
+        <p class="card-body">{{ note.snippet }}</p>
+      </div>
+      {% endfor %}
+
+      <div class="section-banner">
+        <span>Executive Dispatch</span>
+        <span>System Status</span>
+      </div>
+      <div class="callout-bulletin">
+        <span class="pill-tag">DISPATCH</span>
+        <p class="card-body">{{ muse_note }}</p>
+      </div>
+
+      <div class="pull-quote">
+        "{{ quote }}"
+        <span class="quote-author">— {{ quote_author }}</span>
+      </div>
     </div>
+
+    <!-- COLUMN 3: The Weather Bureau & 12-Month Year Progress -->
+    <div class="col">
+      <div class="section-banner">
+        <span>Section C • Atmospheric Desk</span>
+        <span>Open-Meteo</span>
+      </div>
+      <h1 class="headline">Weather Bureau</h1>
+      <h2 class="subhead">Dual-station meteorological observations & barometric profile.</h2>
+
+      <div class="weather-box">
+        <div class="weather-city-row">
+          <div>
+            <div class="w-loc-label">{{ weather.home.name }}, ON</div>
+            <div class="w-cond">{{ weather.home.condition }} ({{ weather.home.temp }}°C)</div>
+          </div>
+          <div class="w-range">{{ weather.home.temp_min }}°C–{{ weather.home.temp_max }}°C</div>
+        </div>
+        <div class="weather-city-row">
+          <div>
+            <div class="w-loc-label">{{ weather.toronto.name }}, ON</div>
+            <div class="w-cond">{{ weather.toronto.condition }} ({{ weather.toronto.temp }}°C)</div>
+          </div>
+          <div class="w-range">{{ weather.toronto.temp_min }}°C–{{ weather.toronto.temp_max }}°C</div>
+        </div>
+      </div>
+
+      <div class="weather-stat-strip">
+        <div class="w-stat-cell">
+          <span class="w-stat-label">Rain Prob</span>
+          <span class="w-stat-val">{{ weather.home.rain_prob }}%</span>
+        </div>
+        <div class="w-stat-cell">
+          <span class="w-stat-label">Total Precip</span>
+          <span class="w-stat-val">{{ weather.home.precip_mm }} mm</span>
+        </div>
+        <div class="w-stat-cell">
+          <span class="w-stat-label">Wind</span>
+          <span class="w-stat-val">{{ weather.home.wind }} km/h</span>
+        </div>
+        <div class="w-stat-cell">
+          <span class="w-stat-label">UV Index</span>
+          <span class="w-stat-val">{{ weather.home.uv }}</span>
+        </div>
+      </div>
+
+      <div class="weather-chart-box">
+        <div class="chart-title">Temperature and Rain Through the Day</div>
+        <svg viewBox="0 0 216 40" width="100%" height="36" style="display:block;">
+          <polyline
+            fill="none"
+            stroke="#000"
+            stroke-width="1.6"
+            points="{{ weather.chart.temp_polyline }}"
+          />
+          <polyline
+            fill="none"
+            stroke="#000"
+            stroke-width="1.2"
+            stroke-dasharray="3,2"
+            points="{{ weather.chart.rain_polyline }}"
+          />
+        </svg>
+        <div class="chart-axis">
+          <span>12 AM</span>
+          <span>6 AM</span>
+          <span>12 PM</span>
+          <span>6 PM</span>
+          <span>11 PM</span>
+        </div>
+        <div class="chart-legend">
+          <span>Temp {{ weather.chart.temp_min }}°–{{ weather.chart.temp_max }}°C (Solid)</span>
+          <span>Rain {{ weather.chart.rain_max }}% (Dashed)</span>
+        </div>
+      </div>
+
+      <div class="section-banner">
+        <span>Year in Review</span>
+        <span>{{ year_progress.year }}</span>
+      </div>
+
+      <div class="yp-header-row">
+        <span class="yp-count">{{ year_progress.day_of_year }}/{{ year_progress.total_days }}</span>
+        <span class="yp-pct">{{ year_progress.percent_exact }} of {{ year_progress.year }}</span>
+      </div>
+
+      <table class="yp-months-table">
+        <tbody>
+          {% for pair in year_progress.month_pairs %}
+          <tr>
+            {% for m in pair %}
+            <td>
+              <div class="yp-month-wrap">
+                <div class="yp-month-name">{{ m.label }}</div>
+                <table class="yp-mini-cal">
+                  <tbody>
+                    {% for wk in m.weeks %}
+                    <tr>
+                      {% for d in wk %}
+                      {% if d.state == 'pad' %}
+                      <td class="yp-day-pad"></td>
+                      {% elif d.state == 'past' %}
+                      <td class="yp-day-past">{{ d.icon }}</td>
+                      {% elif d.state == 'today' %}
+                      <td class="yp-day-today">▪</td>
+                      {% else %}
+                      <td class="yp-day-future">{{ d.icon }}</td>
+                      {% endif %}
+                      {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Authentic Broadsheet Footer Stamp -->
+  <div class="footer-stamp">
+    <span>THE LUMOS CHRONICLE • PRINTED HEADLESS ON PHOMEMO M834</span>
+    <span>▲ TEAR LINE ▲ • ISSUE 102</span>
+    <span>DAILY REPORT 1/1</span>
   </div>
 </body>
 </html>
