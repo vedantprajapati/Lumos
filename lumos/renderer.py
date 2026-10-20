@@ -338,6 +338,9 @@ def generate_pdf(
     return target_pdf
 
 
+generate_daily_digest_pdf = generate_pdf
+
+
 def update_archive_ledger(user_slug: str) -> Path:
     """Scans the user's digest archive directory and maintains a persistent historical ledger."""
     u_cfg = resolve_user(user_slug)
