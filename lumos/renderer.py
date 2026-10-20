@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 from jinja2 import Template
 
 from lumos.config import (
+    BASE_DIR,
     TEMPLATE_PATH,
     get_daily_artifact_paths,
     get_printer_name,
