@@ -144,26 +144,20 @@ def print_pdf_via_bluetooth(
         )
         sock.sendall(header)
 
-        # Pack and stream lines in 4096-byte chunks with miniLZO
+        # Fast 1-bit bitmap packing: PIL mode "1" packs 8 horizontal pixels per byte (MSB to LSB).
+        # In PIL mode "1", 0 = black dot, 1 = white paper.
+        # The M834 thermal head expects 1 = black burn dot, 0 = white.
+        # We invert bits using bytes.translate at C-speed in ~1 millisecond.
+        raw_bytes = image.tobytes()
+        inv_table = bytes(255 - i for i in range(256))
+        inverted_bytes = raw_bytes.translate(inv_table)
+
+        # Stream lines in 4096-byte chunks with miniLZO
         chunk_size = 4096
-        image_bytes = bytearray()
         bytes_compressed_total = len(header)
-
-        for iy in range(total_lines):
-            for ix in range(IMAGE_WIDTH_BYTES):
-                byte = 0
-                for bit in range(8):
-                    # 0 = black dot in 1-bit PIL image
-                    if image.getpixel((ix * 8 + bit, iy)) == 0:
-                        byte |= 1 << (7 - bit)
-                image_bytes.append(byte)
-                if len(image_bytes) == chunk_size:
-                    sent = _send_lzo_chunk(bytes(image_bytes), sock)
-                    bytes_compressed_total += sent
-                    image_bytes.clear()
-
-        if image_bytes:
-            sent = _send_lzo_chunk(bytes(image_bytes), sock)
+        for offset in range(0, len(inverted_bytes), chunk_size):
+            chunk = inverted_bytes[offset : offset + chunk_size]
+            sent = _send_lzo_chunk(chunk, sock)
             bytes_compressed_total += sent
 
         # Query energy to wait for printer processing
