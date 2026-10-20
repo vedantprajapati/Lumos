@@ -5,8 +5,8 @@
 <title>{{ header_title }}</title>
 <style>
   @page {
-    size: 8.5in 11in;
-    margin: 0.16in 0.26in 0.20in 0.26in;
+    size: 8.5in __PAGE_HEIGHT__;
+    margin: 0.18in 0.25in 0.20in 0.25in;
   }
   * {
     box-sizing: border-box;
@@ -14,17 +14,15 @@
     print-color-adjust: exact;
   }
   html, body {
-    width: 7.98in;
-    max-width: 7.98in;
+    width: 8.0in;
+    max-width: 8.0in;
     height: auto;
-    max-height: 10.6in;
-    overflow: hidden;
     font-family: 'Georgia', 'Times New Roman', serif;
-    color: #111;
+    color: #000;
     background: #fff;
     margin: 0 auto;
     padding: 0;
-    line-height: 1.18;
+    line-height: 1.22;
     page-break-after: avoid;
     page-break-inside: avoid;
   }
@@ -34,32 +32,33 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1.5px solid #000;
+    border-bottom: 2px solid #000;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.6pt;
+    font-size: 6.8pt;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    padding-bottom: 2px;
-    font-weight: 800;
+    padding-bottom: 2.5px;
+    font-weight: 900;
+    color: #000;
   }
 
   /* The Grand Broadsheet Masthead */
   .masthead-wrap {
     text-align: center;
-    padding: 2px 0 2px 0;
+    padding: 3px 0 2px 0;
   }
   .masthead-header-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 14px;
     margin: 1px 0;
   }
   .masthead-crest {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
-    filter: grayscale(100%) contrast(150%);
+    filter: grayscale(100%) contrast(200%);
   }
   .masthead-center {
     text-align: center;
@@ -67,43 +66,47 @@
   .motto {
     font-family: 'Georgia', serif;
     font-style: italic;
-    font-size: 6.6pt;
+    font-size: 7.5pt;
+    font-weight: 600;
     letter-spacing: 0.2px;
-    margin-bottom: 1px;
-    color: #222;
+    margin-bottom: 1.5px;
+    color: #000;
   }
   .masthead {
     font-family: 'Times New Roman', 'Playfair Display', serif;
-    font-size: 27pt;
+    font-size: 28pt;
     font-weight: 900;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     margin: 0;
     line-height: 0.95;
+    color: #000;
   }
   .masthead-sub {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 6.6pt;
-    font-weight: 800;
+    font-size: 7.5pt;
+    font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    margin-top: 1.5px;
+    margin-top: 2px;
+    color: #000;
   }
 
   /* Double-Rule Meta Dateline */
   .meta-dateline {
     border-top: 2px solid #000;
     border-bottom: 3px double #000;
-    padding: 2.5px 2px;
-    margin-top: 2.5px;
-    margin-bottom: 5px;
+    padding: 3px 2px;
+    margin-top: 3px;
+    margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 6pt;
-    font-weight: 800;
+    font-size: 7.2pt;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
+    color: #000;
   }
 
   /* 3-Column Layout */
@@ -118,25 +121,26 @@
     min-width: 0;
   }
   .col-border {
-    border-right: 1.2px solid #000;
+    border-right: 1.5px solid #000;
     padding-right: 0.16in;
   }
 
   /* Section Banners & Headlines */
   .section-banner {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.6pt;
+    font-size: 7pt;
     font-weight: 900;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    border-top: 1.5px solid #000;
-    border-bottom: 1px solid #000;
-    padding: 1.5px 0;
-    margin-bottom: 2.5px;
-    margin-top: 4px;
+    border-top: 2px solid #000;
+    border-bottom: 1.5px solid #000;
+    padding: 2px 0;
+    margin-bottom: 3px;
+    margin-top: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: #000;
   }
   .section-banner:first-child {
     border-top: none;
@@ -144,80 +148,87 @@
   }
   h1.headline {
     font-family: 'Times New Roman', serif;
-    font-size: 10.5pt;
+    font-size: 13pt;
     font-weight: 900;
     line-height: 1.05;
     text-transform: uppercase;
-    margin: 0 0 1.5px 0;
+    margin: 0 0 2px 0;
     letter-spacing: -0.2px;
+    color: #000;
   }
   h2.subhead {
     font-family: 'Times New Roman', serif;
-    font-size: 6.8pt;
+    font-size: 7.8pt;
     font-style: italic;
-    margin: 0 0 4px 0;
-    font-weight: normal;
-    color: #333;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    color: #000;
     line-height: 1.15;
   }
 
   /* COLUMN 1: The Hourly Docket */
   .all-day-banner {
-    border: 1px solid #000;
-    padding: 1.5px 3.5px;
-    margin-bottom: 2.5px;
+    border: 1.5px solid #000;
+    padding: 2px 4px;
+    margin-bottom: 3px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.8pt;
-    background: #fbfbfb;
+    font-size: 7.2pt;
+    font-weight: 800;
+    background: #fff;
+    color: #000;
   }
   .timeline-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 3.5px;
+    margin-bottom: 4px;
   }
   .timeline-table td {
     padding: 0;
     vertical-align: top;
   }
   .timeline-hour {
-    width: 27px;
+    width: 32px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.2pt;
-    font-weight: 800;
-    color: #222;
+    font-size: 7pt;
+    font-weight: 900;
+    color: #000;
     text-align: right;
-    padding-right: 3px !important;
-    padding-top: 1px !important;
-    border-right: 1.2px solid #000;
-    height: 12px;
+    padding-right: 4px !important;
+    padding-top: 1.5px !important;
+    border-right: 1.8px solid #000;
+    height: 14px;
     white-space: nowrap;
   }
   .timeline-slot {
-    padding-left: 3px !important;
-    padding-bottom: 1px !important;
-    border-bottom: 1px dotted #ccc;
-    height: 12px;
+    padding-left: 4px !important;
+    padding-bottom: 1.5px !important;
+    border-bottom: 1px dotted #000;
+    height: 14px;
   }
   .event-card {
-    border: 1px solid #000;
-    padding: 1px 3px;
-    margin: 0.5px 0;
+    border: 1.5px solid #000;
+    padding: 2px 4px;
+    margin: 1px 0;
     background: #fff;
     font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #000;
   }
   .event-time {
-    font-size: 5.1pt;
-    font-weight: 800;
+    font-size: 6.8pt;
+    font-weight: 900;
     text-transform: uppercase;
+    color: #000;
   }
   .event-title {
-    font-size: 6pt;
+    font-size: 8pt;
     font-weight: 900;
-    line-height: 1.05;
+    line-height: 1.1;
+    color: #000;
   }
   .event-loc {
-    font-size: 5pt;
-    color: #333;
+    font-size: 6.8pt;
+    font-weight: 700;
+    color: #000;
   }
 
   /* 7-Day Horizon Table */
@@ -225,97 +236,104 @@
     width: 100%;
     border-collapse: collapse;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.8pt;
-    margin-bottom: 2px;
+    font-size: 7.2pt;
+    margin-bottom: 3px;
   }
   .agenda-table td {
-    padding: 1.2px 0;
-    border-bottom: 1px dotted #777;
+    padding: 2px 0;
+    border-bottom: 1px dotted #000;
     vertical-align: top;
+    color: #000;
   }
   .agenda-day {
-    font-weight: 800;
+    font-weight: 900;
     width: 25%;
     white-space: nowrap;
+    color: #000;
   }
   .agenda-time {
     width: 42%;
-    font-size: 5.1pt;
-    font-weight: 700;
-    color: #222;
+    font-size: 7pt;
+    font-weight: 800;
+    color: #000;
     white-space: nowrap;
     padding-right: 2px;
   }
   .agenda-title {
     width: 33%;
-    font-weight: 800;
+    font-weight: 900;
     text-align: right;
+    color: #000;
   }
   .work-hour-cell {
-    font-weight: 800 !important;
-    background: #f2f2f2;
+    font-weight: 900 !important;
+    background: #eee;
   }
   .work-slot-cell {
-    border-left: 2px solid #000 !important;
-    background: #fafafa;
+    border-left: 3px solid #000 !important;
+    background: #fbfbfb;
   }
   .focus-strip {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5pt;
-    color: #555;
+    font-size: 6.8pt;
+    color: #000;
     font-style: italic;
+    font-weight: 700;
     padding: 1px 0;
   }
   .event-card.event-work {
-    background: #f7f7f7;
-    border-left: 2.5px solid #000;
+    background: #fff;
+    border: 2px solid #000;
   }
   .event-card + .event-card {
-    margin-top: 1.5px;
+    margin-top: 2px;
   }
 
   /* Garmin Monthly Gym Ledger Box */
   .framed-box {
-    border: 1.2px solid #000;
-    padding: 3px 4px;
-    margin-bottom: 2px;
+    border: 1.8px solid #000;
+    padding: 4px 5px;
+    margin-bottom: 3px;
   }
   .box-header {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.5pt;
+    font-size: 7.2pt;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
-    border-bottom: 1px solid #000;
-    padding-bottom: 1.5px;
-    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid #000;
+    padding-bottom: 2px;
+    margin-bottom: 3px;
     display: flex;
     justify-content: space-between;
+    color: #000;
   }
   .cal-grid {
     width: 100%;
     border-collapse: collapse;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
   }
   .cal-grid th {
-    font-size: 4.8pt;
+    font-size: 6.2pt;
     font-weight: 900;
     text-transform: uppercase;
     text-align: center;
-    padding-bottom: 1px;
+    padding-bottom: 1.5px;
+    color: #000;
   }
   .cal-cell {
     width: 14.28%;
-    height: 11.5px;
-    border: 0.8px solid #000;
+    height: 13.5px;
+    border: 1px solid #000;
     text-align: center;
     vertical-align: middle;
-    font-size: 5.2pt;
-    font-weight: 700;
+    font-size: 6.8pt;
+    font-weight: 800;
+    color: #000;
   }
   .cal-cell.empty {
-    border: 0.8px dotted #ccc;
+    border: 1px dotted #000;
     background: #fff;
   }
   .cal-cell.gym-hit {
@@ -324,227 +342,258 @@
     font-weight: 900;
   }
   .cal-cell.today-ring {
-    outline: 1.6px solid #000;
+    outline: 2px solid #000;
     outline-offset: -2px;
     font-weight: 900;
   }
   .meta-stats {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.4pt;
-    border-top: 1px dotted #555;
-    padding-top: 1.5px;
-    margin-top: 1.5px;
-    line-height: 1.15;
+    font-size: 6.8pt;
+    font-weight: 700;
+    border-top: 1.5px dotted #000;
+    padding-top: 2px;
+    margin-top: 2px;
+    line-height: 1.25;
+    color: #000;
   }
 
   /* COLUMN 2: Telegraph & Inbox Ledger */
   .category-pill {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.2pt;
+    font-size: 6.8pt;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     background: #000;
     color: #fff;
     display: inline-block;
-    padding: 1px 3.5px;
-    margin-bottom: 1.5px;
+    padding: 1.5px 4px;
+    margin-bottom: 2px;
   }
   .mail-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 3px 0;
-    font-size: 6.2pt;
+    margin: 0 0 4px 0;
+    font-size: 7.5pt;
   }
   .mail-list li {
-    border-bottom: 1px dotted #888;
-    padding: 1.2px 0;
-    line-height: 1.12;
+    border-bottom: 1px dotted #000;
+    padding: 2px 0;
+    line-height: 1.2;
+    color: #000;
+  }
+  .mail-list li.empty-state {
+    font-style: italic;
+    font-weight: 600;
   }
   .mail-sender {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-weight: 800;
-    font-size: 5.6pt;
+    font-weight: 900;
+    font-size: 7.2pt;
     text-transform: uppercase;
+    color: #000;
   }
   ul.check-list {
     list-style: none;
     padding-left: 0;
-    margin: 0 0 3px 0;
-    font-size: 6.2pt;
+    margin: 0 0 4px 0;
+    font-size: 7.8pt;
     font-family: 'Helvetica Neue', Arial, sans-serif;
   }
   ul.check-list li {
     position: relative;
-    padding-left: 10px;
-    margin-bottom: 1.8px;
-    line-height: 1.15;
+    padding-left: 12px;
+    margin-bottom: 2.5px;
+    line-height: 1.2;
+    color: #000;
   }
   ul.check-list li.todo::before {
     content: "□";
     position: absolute;
     left: 0;
-    font-size: 6.8pt;
+    font-size: 8.5pt;
     line-height: 1;
-    font-weight: bold;
+    font-weight: 900;
+    color: #000;
   }
   ul.check-list li.done {
-    color: #444;
+    color: #000;
     text-decoration: line-through;
   }
   ul.check-list li.done::before {
     content: "■";
     position: absolute;
     left: 0;
-    font-size: 6.2pt;
+    font-size: 7.5pt;
     line-height: 1;
+    color: #000;
   }
 
-  /* Callout Bulletins with generous breathing room */
+  /* Callout Bulletins */
   .callout-bulletin {
-    border: 1.2px solid #000;
-    padding: 3.5px 5px 5.5px 5px;
+    border: 1.8px solid #000;
+    padding: 4px 6px;
     margin-bottom: 5px;
     background: #fff;
+    color: #000;
   }
   .pill-tag {
     display: inline-block;
-    border: 1px solid #000;
+    border: 1.5px solid #000;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 4.8pt;
+    font-size: 6.2pt;
     font-weight: 900;
     text-transform: uppercase;
-    padding: 0.5px 3px;
+    padding: 1px 4px;
     margin-bottom: 2px;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
     background: #fff;
+    color: #000;
   }
   .card-body {
-    font-size: 5.8pt;
-    line-height: 1.3;
+    font-size: 7.2pt;
+    line-height: 1.35;
     margin: 2px 0 0 0;
+    color: #000;
   }
   .pull-quote {
-    border-top: 1.4px solid #000;
-    border-bottom: 1.4px solid #000;
-    padding: 3.5px 4px;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    padding: 4px 0;
     text-align: center;
     font-family: 'Georgia', serif;
     font-style: italic;
-    font-size: 6.6pt;
-    margin: 4px 0 2px 0;
-    line-height: 1.15;
+    font-weight: 600;
+    font-size: 8pt;
+    margin: 5px 0 3px 0;
+    line-height: 1.2;
+    color: #000;
   }
   .quote-author {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5pt;
-    font-weight: 800;
+    font-size: 6.8pt;
+    font-weight: 900;
     text-transform: uppercase;
     font-style: normal;
     display: block;
-    margin-top: 1px;
+    margin-top: 1.5px;
     letter-spacing: 0.8px;
+    color: #000;
   }
 
   /* COLUMN 3: Weather Bureau & 12-Month Year Progress */
   .weather-box {
-    border: 1.2px solid #000;
-    padding: 3px 4px;
-    margin-bottom: 2.5px;
+    border: 1.8px solid #000;
+    padding: 4px 5px;
+    margin-bottom: 3px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #000;
   }
   .weather-city-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: 1px 0;
+    padding: 1.5px 0;
   }
   .weather-city-row + .weather-city-row {
-    border-top: 1px dotted #666;
-    margin-top: 1.5px;
-    padding-top: 1.5px;
+    border-top: 1.5px dotted #000;
+    margin-top: 2px;
+    padding-top: 2px;
   }
   .w-loc-label {
-    font-size: 5.2pt;
-    font-weight: 800;
-    text-transform: uppercase;
-  }
-  .w-cond {
     font-size: 6.8pt;
     font-weight: 900;
+    text-transform: uppercase;
+    color: #000;
+  }
+  .w-cond {
+    font-size: 7.8pt;
+    font-weight: 900;
+    color: #000;
   }
   .w-range {
-    font-size: 9pt;
+    font-size: 10.5pt;
     font-weight: 900;
+    color: #000;
   }
   .weather-stat-strip {
     display: flex;
-    gap: 2.5px;
-    margin-bottom: 2.5px;
+    gap: 3px;
+    margin-bottom: 3px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
   }
   .w-stat-cell {
     flex: 1;
-    border: 1px solid #000;
-    padding: 1.5px 1px;
+    border: 1.5px solid #000;
+    padding: 2px 1px;
     text-align: center;
+    color: #000;
   }
   .w-stat-label {
-    font-size: 4.5pt;
-    font-weight: 800;
-    text-transform: uppercase;
-    display: block;
-  }
-  .w-stat-val {
     font-size: 5.8pt;
     font-weight: 900;
+    text-transform: uppercase;
+    display: block;
+    color: #000;
+  }
+  .w-stat-val {
+    font-size: 7.2pt;
+    font-weight: 900;
+    color: #000;
   }
   .weather-chart-box {
-    border: 1.2px solid #000;
-    padding: 2.5px 3.5px;
-    margin-bottom: 3px;
+    border: 1.8px solid #000;
+    padding: 3px 4px;
+    margin-bottom: 4px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #000;
   }
   .chart-title {
-    font-size: 4.8pt;
+    font-size: 6.2pt;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 1px;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5px;
+    color: #000;
   }
   .chart-axis {
     display: flex;
     justify-content: space-between;
-    font-size: 4.5pt;
-    font-weight: 800;
-    border-top: 1px solid #000;
+    font-size: 5.8pt;
+    font-weight: 900;
+    border-top: 1.5px solid #000;
     padding-top: 1px;
     margin-top: 1px;
+    color: #000;
   }
   .chart-legend {
     display: flex;
     justify-content: space-between;
-    font-size: 4.5pt;
-    font-weight: 700;
+    font-size: 5.8pt;
+    font-weight: 800;
     margin-top: 1px;
     text-transform: uppercase;
+    color: #000;
   }
 
-  /* 12-Month Year Progress Grid with Visible Grid Borders */
+  /* 12-Month Year Progress Grid */
   .yp-header-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    margin-bottom: 2px;
+    margin-bottom: 2.5px;
+    color: #000;
   }
   .yp-count {
-    font-size: 8.5pt;
+    font-size: 10pt;
     font-weight: 900;
+    color: #000;
   }
   .yp-pct {
-    font-size: 5.8pt;
-    font-weight: 800;
+    font-size: 7.2pt;
+    font-weight: 900;
+    color: #000;
   }
   .yp-months-table {
     width: 100%;
@@ -554,32 +603,33 @@
   .yp-months-table > tbody > tr > td {
     width: 50%;
     vertical-align: top;
-    padding: 1px 1.5px;
+    padding: 1.5px 2px;
   }
   .yp-month-wrap {
     display: flex;
     align-items: flex-start;
-    gap: 2.5px;
+    gap: 3px;
   }
   .yp-month-name {
-    font-size: 4.6pt;
+    font-size: 5.8pt;
     font-weight: 900;
-    width: 15px;
+    width: 16px;
     text-transform: uppercase;
     padding-top: 0.5px;
     flex-shrink: 0;
+    color: #000;
   }
   .yp-mini-cal {
     border-collapse: separate;
     border-spacing: 1.5px;
   }
   .yp-mini-cal td {
-    width: 7.5px;
-    height: 7.5px;
+    width: 9px;
+    height: 9px;
     padding: 0;
     text-align: center;
     vertical-align: middle;
-    font-size: 4pt;
+    font-size: 5pt;
     line-height: 1;
     box-sizing: border-box;
   }
@@ -588,37 +638,37 @@
     background: transparent;
     visibility: hidden;
   }
-  /* Distinct individual square blocks separated by 1.5px white space */
   .yp-day-past {
-    border: 0.8px solid #000;
+    border: 1px solid #000;
     background: #000 !important;
     color: #fff !important;
   }
   .yp-day-today {
-    border: 1.4px solid #000;
+    border: 2px solid #000;
     background: #fff !important;
     color: #000 !important;
     font-weight: 900;
   }
   .yp-day-future {
-    border: 0.8px solid #333;
+    border: 1px solid #000;
     background: #fff !important;
     color: #000 !important;
   }
 
   /* Broadsheet Footer Stamp */
   .footer-stamp {
-    margin-top: 3px;
-    border-top: 1.5px solid #000;
-    border-bottom: 2px double #000;
-    padding: 2px 0;
+    margin-top: 5px;
+    border-top: 2px solid #000;
+    border-bottom: 3px double #000;
+    padding: 3px 0;
     display: flex;
     justify-content: space-between;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 5.5pt;
-    font-weight: 800;
+    font-size: 7pt;
+    font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.6px;
+    color: #000;
   }
 </style>
 </head>
@@ -782,21 +832,29 @@
       <h1 class="headline">Morning Dispatches</h1>
       <h2 class="subhead">Priority correspondence, tasks & operational directives.</h2>
 
-      <div><span class="category-pill">Gmail Priority</span></div>
+      <div><span class="category-pill">Gmail • Action Items & Tasks</span></div>
       <ul class="mail-list">
-        {% for mail in gmail_updates %}
-        <li><span class="mail-sender">{{ mail.sender }}:</span> {{ mail.subject }}</li>
+        {% for item in gmail_updates %}
+        <li>
+          {% if item.action %}<strong>[{{ item.action }}]</strong> {% endif %}
+          {% if item.sender %}<span class="mail-sender">{{ item.sender }}:</span> {% endif %}
+          {{ item.summary or item.subject }}
+        </li>
         {% else %}
-        <li>No unread primary Gmail threads.</li>
+        <li class="empty-state">No outstanding action items or pending replies.</li>
         {% endfor %}
       </ul>
 
-      <div><span class="category-pill">Outlook Priority</span></div>
+      <div><span class="category-pill">Outlook • Summary & Directives</span></div>
       <ul class="mail-list">
-        {% for mail in outlook_updates %}
-        <li><span class="mail-sender">{{ mail.sender }}:</span> {{ mail.subject }}</li>
+        {% for item in outlook_updates %}
+        <li>
+          {% if item.action %}<strong>[{{ item.action }}]</strong> {% endif %}
+          {% if item.sender %}<span class="mail-sender">{{ item.sender }}:</span> {% endif %}
+          {{ item.summary or item.subject }}
+        </li>
         {% else %}
-        <li>No unread Outlook threads.</li>
+        <li class="empty-state">No pending Outlook directives or outstanding requests.</li>
         {% endfor %}
       </ul>
 
@@ -812,7 +870,7 @@
         <li class="done">{{ task }}</li>
         {% endfor %}
         {% if not tasks_todo and not tasks_done %}
-        <li class="todo" style="color: #666; font-style: italic;">No pending tasks for today.</li>
+        <li class="todo" style="color: #000; font-style: italic; font-weight: 600;">No pending tasks for today.</li>
         {% endif %}
       </ul>
 
@@ -826,7 +884,7 @@
         <p class="card-body">{{ note.snippet }}</p>
       </div>
       {% else %}
-      <div style="font-size: 5.4pt; color: #666; font-style: italic; margin-bottom: 3px;">No pinned memoranda.</div>
+      <div style="font-size: 7pt; color: #000; font-style: italic; font-weight: 600; margin-bottom: 4px;">No pinned memoranda.</div>
       {% endfor %}
 
       <div class="section-banner">

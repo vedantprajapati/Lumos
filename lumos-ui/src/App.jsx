@@ -109,14 +109,14 @@ function App() {
     // Auto-save the user's Gemini API key and Telegram token if not set
     useEffect(() => {
         if (!localStorage.getItem('projector_gemini_api_key')) {
-            localStorage.setItem('projector_gemini_api_key', 'AIzaSyB2qyP9G_v7v76BJsYG13azPXB4Q25FSjY');
+            localStorage.setItem('projector_gemini_api_key', '');
         }
         if (!localStorage.getItem('projector_telegram_token')) {
-            localStorage.setItem('projector_telegram_token', '8412763378:AAHboshqVaX1nw4UdC-atBRW2NnAIjTxpmc');
+            localStorage.setItem('projector_telegram_token', '');
         }
         if (!localStorage.getItem('projector_user_address')) {
-            localStorage.setItem('projector_user_address', '11 Blazing Star St, East Gwillimbury, ON L9N 0S2');
-            setUserAddress('11 Blazing Star St, East Gwillimbury, ON L9N 0S2');
+            localStorage.setItem('projector_user_address', 'Ontario, Canada');
+            setUserAddress('Ontario, Canada');
         }
     }, []);
 
@@ -157,10 +157,10 @@ function App() {
 
     const [showGeminiConfig, setShowGeminiConfig] = useState(false);
     const [showGraph, setShowGraph] = useState(false);
-    const [geminiApiKey, setGeminiApiKey] = useState(() => localStorage.getItem('projector_gemini_api_key') || 'AIzaSyB2qyP9G_v7v76BJsYG13azPXB4Q25FSjY');
+    const [geminiApiKey, setGeminiApiKey] = useState(() => localStorage.getItem('projector_gemini_api_key') || '');
 
     const [showTelegramConfig, setShowTelegramConfig] = useState(false);
-    const [telegramToken, setTelegramToken] = useState(() => localStorage.getItem('projector_telegram_token') || '8412763378:AAHboshqVaX1nw4UdC-atBRW2NnAIjTxpmc');
+    const [telegramToken, setTelegramToken] = useState(() => localStorage.getItem('projector_telegram_token') || '');
 
     const [bambuConfig, setBambuConfig] = useState(() => {
         return {

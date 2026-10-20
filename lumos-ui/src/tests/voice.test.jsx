@@ -93,7 +93,7 @@ describe('Lumos Voice Assistant integration in App', () => {
             render(<App />);
         });
         
-        expect(localStorage.getItem('projector_gemini_api_key')).toBe('AIzaSyB2qyP9G_v7v76BJsYG13azPXB4Q25FSjY');
+        expect(localStorage.getItem('projector_gemini_api_key')).toBe('');
     });
 
     it('displays listening overlay when isRecording or isProcessing states are triggered', async () => {

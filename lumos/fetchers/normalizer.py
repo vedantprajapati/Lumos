@@ -70,6 +70,7 @@ def normalize_gcal_today(
     all_day: List[Dict[str, Any]] = []
 
     # 1. Statutory Holiday check
+    work_loc = os.getenv("WORK_LOCATION_NAME", os.getenv("HOME_LOCATION_NAME", "Work"))
     if is_holiday:
         all_day.append({
             "time": "All Day",
@@ -82,7 +83,7 @@ def normalize_gcal_today(
         all_day.append({
             "time": "9:00 AM – 6:00 PM",
             "title": "Work Day Shift",
-            "location": "East Gwillimbury",
+            "location": work_loc,
             "hour": 9,
             "all_day": True,
             "is_work": True,
@@ -137,42 +138,18 @@ def normalize_gcal_today(
             slots[clamped].append(ev_obj)
 
     # 3. Monday - Friday 9:00 AM – 6:00 PM Work schedule enforcement
+    # Render as exactly ONE unified continuous block for the work shift, not 2 split blocks.
     if is_work_day:
-        # At 9 AM (shift start)
-        has_9am = any(not ev.get("is_work") for ev in slots[9])
+        has_9am = any(ev.get("is_work") for ev in slots[9])
         if not has_9am:
             slots[9].insert(0, {
-                "time": "9:00 AM",
-                "title": "Work Shift Begins",
-                "location": "East Gwillimbury",
+                "time": "9:00 AM – 6:00 PM",
+                "title": "Work Shift",
+                "location": work_loc,
                 "hour": 9,
                 "all_day": False,
                 "is_work": True,
             })
-
-        # At 6 PM (shift end)
-        has_6pm = any(not ev.get("is_work") for ev in slots[18])
-        if not has_6pm:
-            slots[18].append({
-                "time": "6:00 PM",
-                "title": "Work Day Concludes",
-                "location": "",
-                "hour": 18,
-                "all_day": False,
-                "is_work": True,
-            })
-
-        # For hours 10 AM to 5 PM: if an hour has NO specific meetings, mark Focus & Deep Work
-        for h in range(10, 18):
-            if len(slots[h]) == 0:
-                slots[h].append({
-                    "time": "",
-                    "title": "Focus & Execution",
-                    "location": "",
-                    "hour": h,
-                    "all_day": False,
-                    "is_focus": True,
-                })
 
     timeline = []
     for h in TIMELINE_HOURS:
@@ -235,24 +212,38 @@ def normalize_emails(raw_emails: List[Any]) -> List[Dict[str, str]]:
                 sender, subj = item.split(":", 1)
                 out.append({"sender": sender.strip()[:18], "subject": subj.strip()[:50]})
             else:
-                out.append({"sender": "Update", "subject": item.strip()[:50]})
+                out.append({"sender": "", "subject": "", "summary": item.strip()[:65], "action": "Action"})
         elif isinstance(item, dict):
             sender = (
                 item.get("sender")
                 or item.get("from")
                 or item.get("author")
-                or "Inbox"
+                or ""
             )
             subject = (
                 item.get("subject")
-                or item.get("summary")
-                or item.get("snippet")
                 or item.get("title")
-                or "(No Subject)"
+                or ""
+            )
+            summary = (
+                item.get("summary")
+                or item.get("task")
+                or item.get("action_item")
+                or item.get("snippet")
+                or subject
+                or "(Action Required)"
+            )
+            action = (
+                item.get("action")
+                or item.get("priority")
+                or item.get("status")
+                or ""
             )
             out.append({
                 "sender": str(sender).split("<")[0].replace('"', "").strip()[:18],
                 "subject": str(subject).strip()[:50],
+                "summary": str(summary).strip()[:65],
+                "action": str(action).strip()[:14],
             })
     return out[:4]
 

@@ -53,14 +53,14 @@ def get_locations() -> Tuple[LocationCoords, LocationCoords]:
 
 
 def get_configured_users() -> List[str]:
-    raw = os.getenv("DIGEST_USERS", os.getenv("DEFAULT_USER", "vedant"))
+    raw = os.getenv("DIGEST_USERS", os.getenv("DEFAULT_USER", "default"))
     users = [u.strip().lower() for u in raw.split(",") if u.strip()]
-    return users or ["vedant"]
+    return users or [os.getenv("DEFAULT_USER", "default")]
 
 
 def resolve_user(user: Optional[str] = None) -> UserConfig:
     load_dotenv(ENV_PATH, override=True)
-    slug = (user or os.getenv("DEFAULT_USER", "vedant")).strip().lower()
+    slug = (user or os.getenv("DEFAULT_USER", "default")).strip().lower()
     display_name = slug.replace("_", " ").replace("-", " ").title()
     prefix = f"{slug.upper()}_"
 

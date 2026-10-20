@@ -7,8 +7,7 @@ if ($pw.Contains("`n") -or $pw.Length -gt 128 -or $pw.Length -eq 0) {
 $envPath = Join-Path $PSScriptRoot "..\.env"
 $lines = Get-Content $envPath
 $updated = $lines | ForEach-Object {
-    if ($_ -match '^GARMIN_USERNAME=') { "GARMIN_USERNAME=vedant172000@gmail.com" }
-    elseif ($_ -match '^GARMIN_PASSWORD=') { "GARMIN_PASSWORD=$pw" }
+    if ($_ -match '^GARMIN_PASSWORD=') { "GARMIN_PASSWORD=$pw" }
     else { $_ }
 }
 Set-Content -Path $envPath -Value $updated -Encoding UTF8

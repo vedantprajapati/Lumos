@@ -97,10 +97,11 @@ def get_default_work_event(d: date) -> Optional[Dict[str, Any]]:
     if is_holiday:
         return None
     if d.weekday() < 5:  # Monday = 0, Friday = 4
+        work_loc = os.getenv("WORK_LOCATION_NAME", os.getenv("HOME_LOCATION_NAME", "Office"))
         return {
             "time": "9:00 AM – 6:00 PM",
             "title": "Work",
-            "location": "East Gwillimbury",
+            "location": work_loc,
             "hour": 9,
             "all_day": False,
             "is_work": True,

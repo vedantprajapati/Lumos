@@ -16,6 +16,7 @@ from lumos.config import (
     BASE_DIR,
     TEMPLATE_PATH,
     get_daily_artifact_paths,
+    get_locations,
     get_printer_name,
     resolve_user,
 )
@@ -220,6 +221,9 @@ def build_briefing_context(
             except Exception:
                 pass
 
+    home_loc, toronto_loc = get_locations()
+    location_name = f"{home_loc.name} • {toronto_loc.name}"
+
     return {
         "user_slug": u_cfg.slug,
         "user_display": u_cfg.display_name,
@@ -227,7 +231,7 @@ def build_briefing_context(
         "ordinal_date": ordinal_date,
         "date_str": today_dt.strftime("%A, %B %d, %Y"),
         "short_date": today_dt.strftime("%a, %b %d"),
-        "location_name": "11 Blazing Star St, East Gwillimbury • Downtown Toronto",
+        "location_name": location_name,
         "weather": weather,
         "all_day_events": all_day[:2],
         "timeline": timeline,
@@ -270,8 +274,9 @@ def _write_pdf_fallback_browser(rendered_html: str, target_pdf: str) -> bool:
     if not browser:
         return False
 
+    clean_html = rendered_html.replace("__PAGE_HEIGHT__", "11in")
     with tempfile.NamedTemporaryFile("w", suffix=".html", delete=False, encoding="utf-8") as tmp:
-        tmp.write(rendered_html)
+        tmp.write(clean_html)
         tmp_path = Path(tmp.name)
 
     try:
@@ -307,7 +312,19 @@ def generate_pdf(
     try:
         from weasyprint import HTML
 
-        HTML(string=rendered).write_pdf(target_pdf)
+        # Dynamic continuous height: measure content to stop cleanly at the tear-off line
+        if "__PAGE_HEIGHT__" in rendered:
+            measure_html = rendered.replace("__PAGE_HEIGHT__", "35in")
+            doc = HTML(string=measure_html).render()
+            page = doc.pages[0]
+            body = page._page_box.children[0]
+            # Height in points: body position + body height + bottom margin (0.20in = 14.4pt) + small buffer (4pt)
+            bottom_pt = body.position_y + body.height + 14.4 + 4.0
+            height_in = max(8.5, round(bottom_pt / 72.0, 2))
+            final_html = rendered.replace("__PAGE_HEIGHT__", f"{height_in}in")
+            HTML(string=final_html).write_pdf(target_pdf)
+        else:
+            HTML(string=rendered).write_pdf(target_pdf)
     except Exception:
         if not _write_pdf_fallback_browser(rendered, target_pdf):
             raise

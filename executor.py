@@ -84,7 +84,10 @@ def build_digest_summary(ctx: Dict[str, Any]) -> str:
     return formatted_msg
 
 
-def handle_briefing_request(payload: Dict[str, Any], user: str = "vedant", print_cups: bool = True) -> Dict[str, Any]:
+DEFAULT_CLI_USER = os.getenv("DEFAULT_USER", "default")
+
+def handle_briefing_request(payload: Dict[str, Any], user: Optional[str] = None, print_cups: bool = True) -> Dict[str, Any]:
+    target_user = user or DEFAULT_CLI_USER
     """
     Main handler invoked when Muse calls `printer.briefing` or via system.run:
     1. Compiles context & renders the 1-page PDF via WeasyPrint.
@@ -122,9 +125,9 @@ def handle_briefing_request(payload: Dict[str, Any], user: str = "vedant", print
     }
 
 
-def get_archive_summary(user: str = "vedant", send_to_muse: bool = False) -> Dict[str, Any]:
+def get_archive_summary(user: Optional[str] = None, send_to_muse: bool = False) -> Dict[str, Any]:
     """Returns a formatted archive ledger of all previous daily digests."""
-    u_cfg = resolve_user(user)
+    u_cfg = resolve_user(user or DEFAULT_CLI_USER)
     ledger_path = u_cfg.archive_dir / "archive_ledger.json"
     if not ledger_path.exists():
         from lumos.renderer import update_archive_ledger
@@ -164,9 +167,9 @@ def get_archive_summary(user: str = "vedant", send_to_muse: bool = False) -> Dic
     }
 
 
-def resend_archive_pdf(date_str: str, user: str = "vedant") -> Dict[str, Any]:
+def resend_archive_pdf(date_str: str, user: Optional[str] = None) -> Dict[str, Any]:
     """Uploads a specific past edition PDF from the archive directly to Muse chat."""
-    u_cfg = resolve_user(user)
+    u_cfg = resolve_user(user or DEFAULT_CLI_USER)
     pdf_path = u_cfg.archive_dir / f"{date_str}_Lumos_Digest.pdf"
     if not pdf_path.exists():
         matches = list(u_cfg.archive_dir.glob(f"*{date_str}*.pdf"))
@@ -183,7 +186,7 @@ def resend_archive_pdf(date_str: str, user: str = "vedant") -> Dict[str, Any]:
 def main():
     parser = argparse.ArgumentParser(description="Lumos RPC & PDF Messenger")
     parser.add_argument("--payload", help="JSON payload or path to JSON file from Muse", default="{}")
-    parser.add_argument("--user", default="vedant", help="User profile name")
+    parser.add_argument("--user", default=DEFAULT_CLI_USER, help="User profile name")
     parser.add_argument("--no-print", action="store_true", help="Skip sending to CUPS")
     parser.add_argument("--archive", action="store_true", help="List all previous daily digests in the archive")
     parser.add_argument("--resend", help="Resend/upload a specific past PDF by date (YYYY-MM-DD) to Muse chat")
