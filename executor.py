@@ -92,7 +92,7 @@ def handle_briefing_request(payload: Dict[str, Any], user: str = "vedant", print
     4. Returns execution details to caller.
     """
     user_prof = resolve_user(user)
-    ctx = build_briefing_context(payload, user_prof)
+    ctx = build_briefing_context(payload, user=user_prof.slug)
     paths = print_briefing(ctx, user_prof, print_cups=print_cups)
     pdf_path = paths["pdf_path"]
 
