@@ -45,6 +45,11 @@ def main():
         action="store_true",
         help="Render and save HTML artifact to ~/Documents/digest/<user>/ without calling WeasyPrint/CUPS",
     )
+    parser.add_argument(
+        "--no-print",
+        action="store_true",
+        help="Generate PDF and update ledger without sending raw job to CUPS",
+    )
     args = parser.parse_args()
 
     users = [args.user] if args.user else get_configured_users()
@@ -53,6 +58,9 @@ def main():
             render_html(custom_note=args.note, user=u)
             _, html_path, _ = get_daily_artifact_paths(u)
             print(f"Saved HTML digest for '{u}' at: {html_path}")
+        elif args.no_print:
+            pdf_path = generate_daily_digest_pdf(custom_note=args.note, user=u)
+            print(f"Generated PDF (no-print) for '{u}' at: {pdf_path}")
         else:
             print_briefing(custom_note=args.note, user=u)
 
