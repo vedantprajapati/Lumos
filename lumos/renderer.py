@@ -369,13 +369,33 @@ def print_briefing(
     muse_payload: Optional[Dict[str, Any]] = None,
     user: Optional[str] = None,
 ) -> str:
-    printer_name = get_printer_name()
     pdf = generate_pdf(custom_note=custom_note, muse_payload=muse_payload, user=user)
+
+    # 1. Direct Wireless Bluetooth Printing if PHOMEMO_BT_MAC is configured
+    bt_mac = os.getenv("PHOMEMO_BT_MAC", "").strip()
+    if bt_mac:
+        try:
+            from lumos.phomemo import print_pdf_via_bluetooth
+
+            print(f"Connecting wirelessly to Phomemo M834 via Bluetooth ({bt_mac})...")
+            bt_res = print_pdf_via_bluetooth(pdf, mac=bt_mac)
+            if bt_res.get("ok"):
+                bat = bt_res.get("battery_pct")
+                bat_str = f" (Battery: {bat}%)" if bat is not None else ""
+                print(f"Dispatched {pdf} wirelessly to Phomemo M834 via Bluetooth{bat_str}!")
+                return pdf
+            else:
+                print(f"Wireless Bluetooth attempt failed: {bt_res.get('error')}. Falling back to CUPS...")
+        except Exception as e:
+            print(f"Wireless Bluetooth exception: {e}. Falling back to CUPS...")
+
+    # 2. Fallback to CUPS spooler
+    printer_name = get_printer_name()
     try:
         check = subprocess.run(["lpstat", "-p", printer_name], capture_output=True, text=True)
         if check.returncode == 0:
             subprocess.run(["lp", "-d", printer_name, pdf], check=True)
-            print(f"Dispatched {pdf} to {printer_name}")
+            print(f"Dispatched {pdf} to {printer_name} via CUPS")
         else:
             print(f"Notice: Printer '{printer_name}' not registered in CUPS yet. PDF saved at: {pdf}")
     except FileNotFoundError:
