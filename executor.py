@@ -17,8 +17,9 @@ import socket
 import sys
 from typing import Any, Dict, Optional
 
-from lumos.config import get_daily_artifact_paths, resolve_user
-from lumos.renderer import build_briefing_context, print_briefing
+import subprocess
+from lumos.config import get_daily_artifact_paths, get_printer_name, resolve_user
+from lumos.renderer import build_briefing_context, generate_pdf
 
 log = logging.getLogger("lumos.executor")
 MUSE_SOCKET_PATH = "/run/musegadget/musegadget.sock"
@@ -93,19 +94,30 @@ def handle_briefing_request(payload: Dict[str, Any], user: str = "vedant", print
     """
     user_prof = resolve_user(user)
     ctx = build_briefing_context(payload, user=user_prof.slug)
-    paths = print_briefing(ctx, user_prof, print_cups=print_cups)
-    pdf_path = paths["pdf_path"]
+    pdf_path = generate_pdf(muse_payload=payload, user=user_prof.slug)
+
+    if print_cups:
+        printer_name = get_printer_name()
+        try:
+            check = subprocess.run(["lpstat", "-p", printer_name], capture_output=True, text=True)
+            if check.returncode == 0:
+                subprocess.run(["lp", "-d", printer_name, pdf_path], check=True)
+                log.info("Dispatched to %s", printer_name)
+        except Exception as exc:
+            log.warning("CUPS dispatch skipped: %s", exc)
 
     summary_msg = build_digest_summary(ctx)
     session_id = payload.get("session_id")
     muse_upload = send_pdf_to_muse(summary_msg, pdf_path, session_id=session_id)
+
+    _, json_path, _ = get_daily_artifact_paths(user_prof.slug)
 
     return {
         "ok": True,
         "status": "completed",
         "summary": summary_msg,
         "pdf_path": pdf_path,
-        "json_path": paths["json_path"],
+        "json_path": str(json_path),
         "muse_upload": muse_upload,
     }
 
