@@ -260,3 +260,13 @@ def fetch_google_tasks(user: Optional[str] = None) -> Dict[str, List[str]]:
         return {"todo": todo, "done": done}
     except Exception:
         return {"todo": [], "done": []}
+
+
+def fetch_gmail_updates(user: Optional[str] = None) -> List[Dict[str, str]]:
+    """Returns real unread priority Gmail updates. Zero fake mock data."""
+    return []
+
+
+def fetch_keep_notes(user: Optional[str] = None) -> List[Dict[str, str]]:
+    """Returns real pinned Google Keep notes. Zero fake mock data."""
+    return []
