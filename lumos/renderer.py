@@ -191,6 +191,16 @@ def build_briefing_context(
 
     # 6. Garmin Monthly Gym & Biometrics
     garmin = payload.get("garmin") or fetch_garmin_stats(user=u_cfg.slug)
+    if payload.get("workout_completed") or payload.get("workout") or payload.get("gym_completed"):
+        today_num = today_dt.day
+        for wk in garmin.get("month_grid", []):
+            for cell in wk:
+                if cell.get("day") == today_num:
+                    if not cell.get("is_gym"):
+                        cell["is_gym"] = True
+                        garmin["gym_count"] = garmin.get("gym_count", 0) + 1
+                    break
+        garmin["last_gym"] = "Today"
 
     # 7. MinMax Workout Routine Resolution (if scheduled today in GCal or Tasks)
     today_all_events = list(all_day) + [ev for slot in timeline for ev in slot["events"]]

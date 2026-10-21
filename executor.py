@@ -90,24 +90,19 @@ def handle_briefing_request(payload: Dict[str, Any], user: Optional[str] = None,
     target_user = user or DEFAULT_CLI_USER
     """
     Main handler invoked when Muse calls `printer.briefing` or via system.run:
-    1. Compiles context & renders the 1-page PDF via WeasyPrint.
-    2. Sends print job to Phomemo M834.
+    1. Compiles context & renders the continuous PDF via WeasyPrint with dynamic tear-line height.
+    2. Sends print job wirelessly to Phomemo M834 via Bluetooth (with CUPS fallback).
     3. Uploads the actual PDF + summary directly into Muse chat on the phone.
     4. Returns execution details to caller.
     """
-    user_prof = resolve_user(user)
-    ctx = build_briefing_context(payload, user=user_prof.slug)
-    pdf_path = generate_pdf(muse_payload=payload, user=user_prof.slug)
+    user_prof = resolve_user(target_user)
+    ctx = build_briefing_context(muse_payload=payload, user=user_prof.slug)
 
     if print_cups:
-        printer_name = get_printer_name()
-        try:
-            check = subprocess.run(["lpstat", "-p", printer_name], capture_output=True, text=True)
-            if check.returncode == 0:
-                subprocess.run(["lp", "-d", printer_name, pdf_path], check=True)
-                log.info("Dispatched to %s", printer_name)
-        except Exception as exc:
-            log.warning("CUPS dispatch skipped: %s", exc)
+        from lumos.renderer import print_briefing
+        pdf_path = print_briefing(muse_payload=payload, user=user_prof.slug)
+    else:
+        pdf_path = generate_pdf(muse_payload=payload, user=user_prof.slug)
 
     summary_msg = build_digest_summary(ctx)
     session_id = payload.get("session_id")
